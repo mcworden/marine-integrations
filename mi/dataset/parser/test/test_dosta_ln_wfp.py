@@ -98,6 +98,9 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
 
         particles = self.parser.get_records(6)
 
+        for particle in particles:
+            log.info(particle.generate_dict())
+
         # Make sure the fifth particle has the correct values
         self.assert_result(self.test_particle1, particles[5])
 

@@ -16,13 +16,14 @@ import string
 from mi.core.log import get_logger ; log = get_logger()
 
 from mi.dataset.dataset_driver import SimpleDataSetDriver
-from mi.dataset.parser.dosta_ln_wfp import DostaLnWfpParser, DostaLnWfpParserDataParticle
+from mi.dataset.parser.dosta_ln_wfp import DostaLnWfpParser, DostaLnWfpInstrumentParserDataParticle
+from mi.dataset.harvester import SingleDirectoryHarvester
 
-class DostaLnWfp(SimpleDataSetDriver):
+class DostaLnWfpDataSetDriver(SimpleDataSetDriver):
     
     @classmethod
     def stream_config(cls):
-        return [DostaLnWfpParserDataParticle.type()]
+        return [DostaLnWfpInstrumentParserDataParticle.type()]
 
     def _build_parser(self, parser_state, infile):
         """
@@ -31,9 +32,9 @@ class DostaLnWfp(SimpleDataSetDriver):
         config = self._parser_config
         config.update({
             'particle_module': 'mi.dataset.parser.dosta_ln_wfp',
-            'particle_class': 'DostaLnWfpParserDataParticle'
+            'particle_class': 'DostaLnWfpInstrumentParserDataParticle'
         })
-        log.debug("My Config: %s", config)
+        log.info("My Config: %s", config)
         self._parser = DostaLnWfpParser(
             config,
             parser_state,
@@ -49,5 +50,11 @@ class DostaLnWfp(SimpleDataSetDriver):
         Build and return the harvester
         """
         # *** Replace the following with harvester initialization ***
-        self._harvester = None     
+        self._harvester = SingleDirectoryHarvester(
+            self._harvester_config,
+            driver_state,
+            self._new_file_callback,
+            self._modified_file_callback,
+            self._exception_callback
+        )
         return self._harvester

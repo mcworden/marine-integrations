@@ -17,6 +17,10 @@ from mi.core.exceptions import SampleException, NotImplementedException, Dataset
 from mi.core.common import BaseEnum
 from mi.dataset.dataset_parser import BufferLoadingParser
 
+# This regex will be used to match the flags for one of the two bit patterns:
+#  0001 0000 0000 0000 0001 0001 0000 0000  (regex: \x00\x01\x00{7}\x01\x00\x01\x00{4})
+#  0001 0000 0000 0001 0000 0000 0000 0001 (regex: \x00\x01\x00{5}\x01\x00{7}\x01)
+#  followed by 8 bytes of variable timestamp data (regex: [\x00-\xff]{8})
 HEADER_REGEX = b'(\x00\x01\x00{5}[\x00-\x01]\x00[\x00-\x01]\x00[\x00-\x01]\x00{3}[\x00-\x01])([\x00-\xff]{8})'
 HEADER_MATCHER = re.compile(HEADER_REGEX)
 
@@ -26,10 +30,6 @@ STATUS_START_MATCHER = re.compile(STATUS_START_REGEX)
 PROFILE_REGEX = b'\xff\xff\xff[\xfa-\xff][\x00-\xff]{12}'
 PROFILE_MATCHER = re.compile(PROFILE_REGEX)
 
-# This regex will be used to match the flags for one of the two bit patterns:
-# 0001 0000 0000 0000 0001 0001 0000 0000  (regex: \x00\x01\x00{7}\x01\x00\x01\x00{4})
-# 0001 0000 0000 0001 0000 0000 0000 0001 (regex: \x00\x01\x00{5}\x01\x00{7}\x01)
-# followed by 8 bytes of variable timestamp data (regex: [\x00-\xff]{8})
 HEADER_BYTES = 24
 
 SAMPLE_BYTES = 26

@@ -1,0 +1,13 @@
+header:
+  particle_object: 'MULTIPLE'
+  particle_type: 'MULTIPLE'
+
+data:
+  - _index: 1
+    internal_timestamp: 3583638124.0
+    particle_object: DostaLnWfpInstrumentParserDataParticle
+    particle_type: dosta_ln_wfp_instrument
+    optode_oxygen: 0.0
+    optode_temperature: 0.0
+    wfp_timestamp: 1374649324
+
