@@ -22,10 +22,15 @@ from mi.core.log import get_logger ; log = get_logger()
 from mi.core.common import BaseEnum
 from mi.core.instrument.data_particle import DataParticle, DataParticleKey
 from mi.core.exceptions import SampleException, DatasetParserException
-from mi.dataset.parser.WFP_E_file_common import WfpEFileParser, HEADER_MATCHER, StateKey
+from mi.dataset.parser.WFP_E_file_common import WfpEFileParser, StateKey
 from mi.dataset.parser.WFP_E_file_common import HEADER_BYTES, SAMPLE_BYTES, STATUS_BYTES, PROFILE_MATCHER
 from mi.dataset.dataset_parser import Parser
 
+# This regex will be used to match the flags for the global wfp e engineering record:
+# 0001 0000 0000 0000 0001 0001 0000 0000  (regex: \x00\x01\x00{7}\x01\x00\x01\x00{4})
+# followed by 8 bytes of variable timestamp data (regex: [\x00-\xff]{8})
+WFP_E_COASTAL_FLAGS_HEADER_REGEX = b'(\x00\x01\x00{7}\x01\x00\x01\x00{4})([\x00-\xff]{8})'
+WFP_E_COASTAL_FLAGS_HEADER_MATCHER = re.compile(WFP_E_COASTAL_FLAGS_HEADER_REGEX)
 
 class DataParticleType(BaseEnum):
     START_TIME = 'wfp_eng__stc_imodem_start_time'
@@ -39,7 +44,7 @@ class Wfp_eng__stc_imodem_statusParserDataParticleKey(BaseEnum):
     SENSOR_STOP = 'wfp_sensor_stop'
     PROFILE_STOP = 'wfp_profile_stop'
 
-    
+
 class Wfp_eng__stc_imodem_statusParserDataParticle(DataParticle):
     """
     Class for parsing data from the WFP_ENG__STC_IMODEM data set
@@ -68,7 +73,7 @@ class Wfp_eng__stc_imodem_statusParserDataParticle(DataParticle):
             sensor_stop = int(fields_prof[4])
         except (ValueError, TypeError, IndexError) as ex:
             raise SampleException("Error (%s) while decoding parameters in data: [%s]"
-                                  % (ex, match.group(0)))
+                                  % (ex, match_prof.group(0)))
 
         result = [{DataParticleKey.VALUE_ID: Wfp_eng__stc_imodem_statusParserDataParticleKey.INDICATOR,
                    DataParticleKey.VALUE: indicator},
@@ -86,7 +91,7 @@ class Wfp_eng__stc_imodem_statusParserDataParticle(DataParticle):
     def __eq__(self, arg):
         """
         Quick equality check for testing purposes. If they have the same raw
-        data, timestamp, and new sequence, they are the same enough for this 
+        data, timestamp, and new sequence, they are the same enough for this
         particle
         """
         if ((self.raw_data == arg.raw_data) and \
@@ -118,7 +123,7 @@ class Wfp_eng__stc_imodem_startParserDataParticle(DataParticle):
         a particle with the appropriate tag.
         @throws SampleException If there is a problem with sample creation
         """
-        match = HEADER_MATCHER.match(self.raw_data)
+        match = WFP_E_COASTAL_FLAGS_HEADER_MATCHER.match(self.raw_data)
 
         if not match:
             raise SampleException("Wfp_eng__stc_imodem_startParserDataParticle: No regex match of parsed sample data: [%s]",
@@ -143,7 +148,7 @@ class Wfp_eng__stc_imodem_startParserDataParticle(DataParticle):
     def __eq__(self, arg):
         """
         Quick equality check for testing purposes. If they have the same raw
-        data, timestamp, and new sequence, they are the same enough for this 
+        data, timestamp, and new sequence, they are the same enough for this
         particle
         """
         if ((self.raw_data == arg.raw_data) and \
@@ -205,7 +210,7 @@ class Wfp_eng__stc_imodem_engineeringParserDataParticle(DataParticle):
     def __eq__(self, arg):
         """
         Quick equality check for testing purposes. If they have the same raw
-        data, timestamp, and new sequence, they are the same enough for this 
+        data, timestamp, and new sequence, they are the same enough for this
         particle
         """
         if ((self.raw_data == arg.raw_data) and \
@@ -260,13 +265,14 @@ class Wfp_eng__stc_imodemParser(WfpEFileParser):
         # read the first bytes from the file
         header = self._stream_handle.read(HEADER_BYTES)
         # parse the header
-        if HEADER_MATCHER.match(header):
-            match = HEADER_MATCHER.match(header)
+        if WFP_E_COASTAL_FLAGS_HEADER_MATCHER.match(header):
+            match = WFP_E_COASTAL_FLAGS_HEADER_MATCHER.match(header)
             # use the profile start time as the timestamp
             fields = struct.unpack('>II', match.group(2))
             timestamp = int(fields[1])
             self._timestamp = float(ntplib.system_to_ntp_time(timestamp))
-            sample = self._extract_sample(Wfp_eng__stc_imodem_startParserDataParticle, HEADER_MATCHER,
+            sample = self._extract_sample(Wfp_eng__stc_imodem_startParserDataParticle,
+                                          WFP_E_COASTAL_FLAGS_HEADER_MATCHER,
                                           header, self._timestamp)
             # store this in case we need the data to calculate other timestamps
             self._profile_start_stop_data = fields
@@ -307,7 +313,7 @@ class Wfp_eng__stc_imodemParser(WfpEFileParser):
             # create particle
             log.trace("Extracting sample %s with read_state: %s", sample, self._read_state)
             result_particle = (sample, copy.copy(self._read_state))
-                    
+
         return result_particle
 
     def parse_chunks(self):
