@@ -96,7 +96,7 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
         Assert that the results are those we expected.
         """
 
-        file_path = os.path.join(RESOURCE_PATH, 'E0000001.DAT')
+        file_path = os.path.join(RESOURCE_PATH, 'small.DAT')
         self.stream_handle = open(file_path, 'rb')
 
         self.parser = DostaLnWfpParser(self.config, self.start_state, self.stream_handle,
