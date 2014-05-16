@@ -210,7 +210,7 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
 
         self.assert_result(self.test_particle1, particles[3])
 
-        # Moving the file position past the header and two records
+        # Moving the file position past the header and three records
         new_state = {StateKey.POSITION: HEADER_BYTES+(WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_BYTES*3)}
 
         self.parser = DostaLnWfpParser(self.config, new_state, self.stream_handle,
