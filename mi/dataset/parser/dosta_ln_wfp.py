@@ -88,12 +88,11 @@ class DostaLnWfpInstrumentParserDataParticle(DataParticle):
             raise SampleException("Error (%s) while decoding parameters in data: [%s]"
                                   % (ex, match.group(0)))
 
-        result = [{DataParticleKey.VALUE_ID: DostaLnWfpInstrumentParserDataParticleKey.OPTODE_OXYGEN,
-                   DataParticleKey.VALUE: optode_oxygen},
-                  {DataParticleKey.VALUE_ID: DostaLnWfpInstrumentParserDataParticleKey.OPTODE_TEMPERATUURE,
-                   DataParticleKey.VALUE: optode_temperature},
-                  {DataParticleKey.VALUE_ID: DostaLnWfpInstrumentParserDataParticleKey.WFP_TIMESTAMP,
-                   DataParticleKey.VALUE: wfp_timestamp}]
+        result = [self._encode_value(DostaLnWfpInstrumentParserDataParticleKey.OPTODE_OXYGEN, optode_oxygen, float),
+                  self._encode_value(DostaLnWfpInstrumentParserDataParticleKey.OPTODE_TEMPERATUURE,
+                                     optode_temperature, float),
+                  self._encode_value(DostaLnWfpInstrumentParserDataParticleKey.WFP_TIMESTAMP,
+                                     wfp_timestamp, int)]
         log.debug('DostaLnWfpInstrumentParserDataParticle: particle=%s', result)
         return result
 
@@ -218,7 +217,8 @@ class DostaLnWfpParser(WfpEFileParser):
         timestamp. Go until the chunker has no more valid data.
         @retval a list of tuples with sample particles encountered in this
             parsing, plus the state. An empty list of nothing was parsed.
-        """            
+        """
+        log.debug("parse_chunks")
         result_particles = []
         (nd_timestamp, non_data, non_start, non_end) = self._chunker.get_next_non_data_with_index(clean=False)
         (timestamp, chunk, start, end) = self._chunker.get_next_data_with_index(clean=True)

@@ -26,7 +26,7 @@ from mi.dataset.parser.WFP_E_file_common import WfpEFileParser, StateKey
 from mi.dataset.parser.WFP_E_file_common import HEADER_BYTES, SAMPLE_BYTES, STATUS_BYTES, PROFILE_MATCHER
 from mi.dataset.dataset_parser import Parser
 
-# This regex will be used to match the flags for the global wfp e engineering record:
+# This regex will be used to match the flags for the coastal wfp e engineering record:
 # 0001 0000 0000 0000 0001 0001 0000 0000  (regex: \x00\x01\x00{7}\x01\x00\x01\x00{4})
 # followed by 8 bytes of variable timestamp data (regex: [\x00-\xff]{8})
 WFP_E_COASTAL_FLAGS_HEADER_REGEX = b'(\x00\x01\x00{7}\x01\x00\x01\x00{4})([\x00-\xff]{8})'
@@ -75,36 +75,14 @@ class Wfp_eng__stc_imodem_statusParserDataParticle(DataParticle):
             raise SampleException("Error (%s) while decoding parameters in data: [%s]"
                                   % (ex, match_prof.group(0)))
 
-        result = [{DataParticleKey.VALUE_ID: Wfp_eng__stc_imodem_statusParserDataParticleKey.INDICATOR,
-                   DataParticleKey.VALUE: indicator},
-                  {DataParticleKey.VALUE_ID: Wfp_eng__stc_imodem_statusParserDataParticleKey.RAMP_STATUS,
-                   DataParticleKey.VALUE: ramp_status},
-                  {DataParticleKey.VALUE_ID: Wfp_eng__stc_imodem_statusParserDataParticleKey.PROFILE_STATUS,
-                   DataParticleKey.VALUE: profile_status},
-                  {DataParticleKey.VALUE_ID: Wfp_eng__stc_imodem_statusParserDataParticleKey.SENSOR_STOP,
-                   DataParticleKey.VALUE: sensor_stop},
-                  {DataParticleKey.VALUE_ID: Wfp_eng__stc_imodem_statusParserDataParticleKey.PROFILE_STOP,
-                   DataParticleKey.VALUE: profile_stop}]
+        result = [self._encode_value(Wfp_eng__stc_imodem_statusParserDataParticleKey.INDICATOR, indicator, int),
+                  self._encode_value(Wfp_eng__stc_imodem_statusParserDataParticleKey.RAMP_STATUS, ramp_status, int),
+                  self._encode_value(Wfp_eng__stc_imodem_statusParserDataParticleKey.PROFILE_STATUS, profile_status, int),
+                  self._encode_value(Wfp_eng__stc_imodem_statusParserDataParticleKey.SENSOR_STOP, sensor_stop, int),
+                  self._encode_value(Wfp_eng__stc_imodem_statusParserDataParticleKey.PROFILE_STOP, profile_stop, int)]
         log.debug('Wfp_eng__stc_imodem_statusParserDataParticle: particle=%s', result)
         return result
 
-    def __eq__(self, arg):
-        """
-        Quick equality check for testing purposes. If they have the same raw
-        data, timestamp, and new sequence, they are the same enough for this
-        particle
-        """
-        if ((self.raw_data == arg.raw_data) and \
-            (self.contents[DataParticleKey.INTERNAL_TIMESTAMP] == \
-             arg.contents[DataParticleKey.INTERNAL_TIMESTAMP])):
-            return True
-        else:
-            if self.raw_data != arg.raw_data:
-                log.debug('Raw data does not match')
-            elif self.contents[DataParticleKey.INTERNAL_TIMESTAMP] != \
-                 arg.contents[DataParticleKey.INTERNAL_TIMESTAMP]:
-                log.debug('Timestamp does not match')
-            return False
 
 class Wfp_eng__stc_imodem_startParserDataParticleKey(BaseEnum):
     SENSOR_START = 'wfp_sensor_start'
@@ -138,30 +116,11 @@ class Wfp_eng__stc_imodem_startParserDataParticle(DataParticle):
             raise SampleException("Error (%s) while decoding parameters in data: [%s]"
                                   % (ex, match.group(0)))
 
-        result = [{DataParticleKey.VALUE_ID: Wfp_eng__stc_imodem_startParserDataParticleKey.SENSOR_START,
-                   DataParticleKey.VALUE: sensor_start},
-                  {DataParticleKey.VALUE_ID: Wfp_eng__stc_imodem_startParserDataParticleKey.PROFILE_START,
-                   DataParticleKey.VALUE: profile_start}]
+        result = [self._encode_value(Wfp_eng__stc_imodem_startParserDataParticleKey.SENSOR_START, sensor_start, int),
+                  self._encode_value(Wfp_eng__stc_imodem_startParserDataParticleKey.PROFILE_START, profile_start, int)]
         log.debug('Wfp_eng__stc_imodem_startParserDataParticle: particle=%s', result)
         return result
 
-    def __eq__(self, arg):
-        """
-        Quick equality check for testing purposes. If they have the same raw
-        data, timestamp, and new sequence, they are the same enough for this
-        particle
-        """
-        if ((self.raw_data == arg.raw_data) and \
-            (self.contents[DataParticleKey.INTERNAL_TIMESTAMP] == \
-             arg.contents[DataParticleKey.INTERNAL_TIMESTAMP])):
-            return True
-        else:
-            if self.raw_data != arg.raw_data:
-                log.debug('Raw data does not match')
-            elif self.contents[DataParticleKey.INTERNAL_TIMESTAMP] != \
-                 arg.contents[DataParticleKey.INTERNAL_TIMESTAMP]:
-                log.debug('Timestamp does not match')
-            return False
 
 class Wfp_eng__stc_imodem_engineeringParserDataParticleKey(BaseEnum):
     TIMESTAMP = 'wfp_timestamp'
@@ -194,36 +153,15 @@ class Wfp_eng__stc_imodem_engineeringParserDataParticle(DataParticle):
             profile_pressure = float(fields[3])
         except(ValueError, TypeError, IndexError) as ex:
             raise SampleException("Error (%s) while decoding parameters in data: [%s]"
-                                  % (ex, match.group(0)))
+                                  % (ex, self.raw_data[:16]))
 
-        result = [{DataParticleKey.VALUE_ID: Wfp_eng__stc_imodem_engineeringParserDataParticleKey.TIMESTAMP,
-                   DataParticleKey.VALUE: timestamp},
-                  {DataParticleKey.VALUE_ID: Wfp_eng__stc_imodem_engineeringParserDataParticleKey.PROF_CURRENT,
-                   DataParticleKey.VALUE: profile_current},
-                  {DataParticleKey.VALUE_ID: Wfp_eng__stc_imodem_engineeringParserDataParticleKey.PROF_VOLTAGE,
-                   DataParticleKey.VALUE: profile_voltage},
-                  {DataParticleKey.VALUE_ID: Wfp_eng__stc_imodem_engineeringParserDataParticleKey.PROF_PRESSURE,
-                   DataParticleKey.VALUE: profile_pressure}]
+        result = [self._encode_value(Wfp_eng__stc_imodem_engineeringParserDataParticleKey.TIMESTAMP, timestamp, int),
+                  self._encode_value(Wfp_eng__stc_imodem_engineeringParserDataParticleKey.PROF_CURRENT, profile_current, float),
+                  self._encode_value(Wfp_eng__stc_imodem_engineeringParserDataParticleKey.PROF_VOLTAGE, profile_voltage, float),
+                  self._encode_value(Wfp_eng__stc_imodem_engineeringParserDataParticleKey.PROF_PRESSURE, profile_pressure, float)]
         log.debug('Wfp_eng__stc_imodem_engineeringParserDataParticle: particle=%s', result)
         return result
 
-    def __eq__(self, arg):
-        """
-        Quick equality check for testing purposes. If they have the same raw
-        data, timestamp, and new sequence, they are the same enough for this
-        particle
-        """
-        if ((self.raw_data == arg.raw_data) and \
-            (self.contents[DataParticleKey.INTERNAL_TIMESTAMP] == \
-             arg.contents[DataParticleKey.INTERNAL_TIMESTAMP])):
-            return True
-        else:
-            if self.raw_data != arg.raw_data:
-                log.debug('Raw data does not match')
-            elif self.contents[DataParticleKey.INTERNAL_TIMESTAMP] != \
-                 arg.contents[DataParticleKey.INTERNAL_TIMESTAMP]:
-                log.debug('Timestamp does not match')
-            return False
 
 class Wfp_eng__stc_imodemParser(WfpEFileParser):
 
@@ -272,7 +210,7 @@ class Wfp_eng__stc_imodemParser(WfpEFileParser):
             timestamp = int(fields[1])
             self._timestamp = float(ntplib.system_to_ntp_time(timestamp))
             sample = self._extract_sample(Wfp_eng__stc_imodem_startParserDataParticle,
-                                          WFP_E_COASTAL_FLAGS_HEADER_MATCHER,
+                                          None,
                                           header, self._timestamp)
             # store this in case we need the data to calculate other timestamps
             self._profile_start_stop_data = fields
@@ -297,7 +235,7 @@ class Wfp_eng__stc_imodemParser(WfpEFileParser):
             # use the profile stop time
             timestamp = int(fields[3])
             self._timestamp = float(ntplib.system_to_ntp_time(timestamp))
-            sample = self._extract_sample(Wfp_eng__stc_imodem_statusParserDataParticle, PROFILE_MATCHER,
+            sample = self._extract_sample(Wfp_eng__stc_imodem_statusParserDataParticle, None,
                                           record, self._timestamp)
             self._increment_state(STATUS_BYTES)
         else:
@@ -331,18 +269,31 @@ class Wfp_eng__stc_imodemParser(WfpEFileParser):
 	    result_particles.append(self._saved_header)
 	    self._saved_header = None
 
-        (timestamp, chunk, start, end) = self._chunker.get_next_data_with_index()
-        non_data = None
+        (nd_timestamp, non_data, non_start, non_end) = self._chunker.get_next_non_data_with_index(clean=False)
+        (timestamp, chunk, start, end) = self._chunker.get_next_data_with_index(clean=True)
+        self.handle_non_data(non_data, non_end, start)
 
         while (chunk != None):
             result_particle = self.parse_record(chunk)
             if result_particle:
                 result_particles.append(result_particle)
 
-            (timestamp, chunk, start, end) = self._chunker.get_next_data_with_index()
-            (nd_timestamp, non_data) = self._chunker.get_next_non_data(clean=True)
+            (nd_timestamp, non_data, non_start, non_end) = self._chunker.get_next_non_data_with_index(clean=False)
+            (timestamp, chunk, start, end) = self._chunker.get_next_data_with_index(clean=True)
+            self.handle_non_data(non_data, non_end, start)
 
         return result_particles
 
+    def handle_non_data(self, non_data, non_end, start):
+        """
+        This method handles any non-data that is found in the file
+        """
+        # if non-data is expected, handle it here, otherwise it is an error
+        if non_data is not None and non_end <= start:
+            # if this non-data is an error, send an UnexpectedDataException and increment the state
+            self._increment_state(len(non_data))
+            # if non-data is a fatal error, directly call the exception, if it is not use the _exception_callback
+            self._exception_callback(UnexpectedDataException("Found %d bytes of un-expected non-data %s" %
+                                                             (len(non_data), non_data)))
 
 

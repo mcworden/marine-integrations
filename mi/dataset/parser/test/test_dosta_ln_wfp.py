@@ -62,21 +62,29 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
         self.publish_callback_value = None
 
         self.test_particle1 = {}
+        self.test_particle1['internal_timestamp'] = 3583638177
+        self.test_particle1[StateKey.POSITION] = 204
         self.test_particle1['optode_oxygen'] = 154.23699951171875
         self.test_particle1['optode_temperature'] = 1.4819999933242798
         self.test_particle1['wfp_timestamp'] = 1374649377
 
         self.test_particle2 = {}
+        self.test_particle2['internal_timestamp'] = 3583638247
+        self.test_particle2[StateKey.POSITION] = 414
         self.test_particle2['optode_oxygen'] = 153.7899932861328
         self.test_particle2['optode_temperature'] = 1.4950000047683716
         self.test_particle2['wfp_timestamp'] = 1374649447
 
         self.test_particle3 = {}
+        self.test_particle3['internal_timestamp'] = 3583638317
+        self.test_particle3[StateKey.POSITION] = 624
         self.test_particle3['optode_oxygen'] = 153.41099548339844
         self.test_particle3['optode_temperature'] = 1.5
         self.test_particle3['wfp_timestamp'] = 1374649517
 
         self.test_particle4 = {}
+        self.test_particle4['internal_timestamp'] = 3583638617
+        self.test_particle4[StateKey.POSITION] = 1524
         self.test_particle4['optode_oxygen'] = 152.13600158691406
         self.test_particle4['optode_temperature'] = 1.5019999742507935
         self.test_particle4['wfp_timestamp'] = 1374649817
@@ -88,11 +96,9 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
         Assert that the results are those we expected.
         """
 
-        fid = open(os.path.join(RESOURCE_PATH, 'E0000001.DAT'), 'rb')
-        test_buffer = fid.read()
-        fid.close()
+        file_path = os.path.join(RESOURCE_PATH, 'E0000001.DAT')
+        self.stream_handle = open(file_path, 'rb')
 
-        self.stream_handle = StringIO(test_buffer)
         self.parser = DostaLnWfpParser(self.config, self.start_state, self.stream_handle,
                                      self.state_callback, self.pub_callback, self.exception_callback)
 
@@ -107,39 +113,45 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
         test_data = self.get_dict_from_yml('good.yml')
         self.assert_result(test_data['data'][0], particles[5])
 
+        self.stream_handle.close()
+
 
     def test_get_many(self):
         """
         Read test data and pull out multiple data particles at one time.
         Assert that the results are those we expected.
         """
-        fid = open(os.path.join(RESOURCE_PATH, 'E0000001.DAT'), 'rb')
-        test_buffer = fid.read()
-        fid.close()
+        file_path = os.path.join(RESOURCE_PATH, 'E0000001.DAT')
+        self.stream_handle = open(file_path, 'rb')
 
-        self.stream_handle = StringIO(test_buffer)
         self.parser = DostaLnWfpParser(self.config, self.start_state, self.stream_handle,
                                      self.state_callback, self.pub_callback, self.exception_callback)
 
-        particles = self.parser.get_records(50)
+        particles = self.parser.get_records(20)
 
-        # Should end up with 683 particles
-        self.assertTrue(len(particles) == 50)
+        # Should end up with 20 particles
+        self.assertTrue(len(particles) == 20)
 
         self.assert_result(self.test_particle3, particles[19])
 
-        self.assert_result(self.test_particle4, particles[49])
+        particles = self.parser.get_records(30)
+
+        # Should end up with 20 particles
+        self.assertTrue(len(particles) == 30)
+
+        self.assert_result(self.test_particle4, particles[29])
+
+        self.stream_handle.close()
+
 
 
     def test_long_stream(self):
         """
         Test a long stream 
         """
-        fid = open(os.path.join(RESOURCE_PATH, 'E0000001.DAT'), 'rb')
-        test_buffer = fid.read()
-        fid.close()
+        file_path = os.path.join(RESOURCE_PATH, 'E0000001.DAT')
+        self.stream_handle = open(file_path, 'rb')
 
-        self.stream_handle = StringIO(test_buffer)
         self.parser = DostaLnWfpParser(self.config, self.start_state, self.stream_handle,
                                      self.state_callback, self.pub_callback, self.exception_callback)
 
@@ -148,16 +160,16 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
         # Should end up with 683 particles
         self.assertTrue(len(particles) == 683)
 
+        self.stream_handle.close()
+
+
 
     def test_mid_state_start(self):
         """
         Test starting the parser in a state in the middle of processing
         """
-        fid = open(os.path.join(RESOURCE_PATH, 'E0000001.DAT'), 'rb')
-        test_buffer = fid.read()
-        fid.close()
-
-        self.stream_handle = StringIO(test_buffer)
+        file_path = os.path.join(RESOURCE_PATH, 'E0000001.DAT')
+        self.stream_handle = open(file_path, 'rb')
 
         # Moving the file position past the header and two records
         new_state = {StateKey.POSITION: HEADER_BYTES+(WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_BYTES*2)}
@@ -172,6 +184,8 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
 
         self.assert_result(self.test_particle1, particles[3])
 
+        self.stream_handle.close()
+
 
 
     def test_set_state(self):
@@ -180,11 +194,8 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
         reading data, as if new data has been found and the state has
         changed
         """
-        fid = open(os.path.join(RESOURCE_PATH, 'E0000001.DAT'), 'rb')
-        test_buffer = fid.read()
-        fid.close()
-
-        self.stream_handle = StringIO(test_buffer)
+        filepath = os.path.join(RESOURCE_PATH, 'E0000001.DAT')
+        self.stream_handle = open(filepath, 'rb')
 
         # Moving the file position past the header and two records
         new_state = {StateKey.POSITION: HEADER_BYTES+(WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_BYTES*2)}
@@ -207,21 +218,20 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
 
         particles = self.parser.get_records(10)
 
-        # Should end up with 683 particles
+        # Should end up with 10 particles
         self.assertTrue(len(particles) == 10)
 
         self.assert_result(self.test_particle2, particles[9])
+
+        self.stream_handle.close()
 
 
     def test_bad_data(self):
         """
         Ensure that bad data is skipped when it exists.
         """
-        fid = open(os.path.join(RESOURCE_PATH, 'E0000001-BAD-DATA.DAT'), 'rb')
-        test_buffer = fid.read()
-        fid.close()
-
-        self.stream_handle = StringIO(test_buffer)
+        file_path = os.path.join(RESOURCE_PATH, 'E0000001-BAD-DATA.DAT')
+        self.stream_handle = open(file_path, 'rb')
 
         self.parser = DostaLnWfpParser(self.config, self.start_state, self.stream_handle,
                                        self.state_callback, self.pub_callback, self.exception_callback)
@@ -229,6 +239,9 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
 
         with self.assertRaises(SampleException):
              self.parser.get_records(1)
+
+        self.stream_handle.close()
+
 
 
     def test_bad_header(self):
@@ -238,25 +251,25 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
 
         # This case tests against a header that does not match
         # 0000 0000 0000 0100 0000 0000 0000 0151
-        fid = open(os.path.join(RESOURCE_PATH, 'E0000001-BAD-HEADER1.DAT'), 'rb')
-        test_buffer = fid.read()
-        fid.close()
+        file_path = os.path.join(RESOURCE_PATH, 'E0000001-BAD-HEADER1.DAT')
+        self.stream_handle = open(file_path, 'rb')
 
-        self.stream_handle = StringIO(test_buffer)
         with self.assertRaises(SampleException):
             self.parser = DostaLnWfpParser(self.config, self.start_state, self.stream_handle,
                                            self.state_callback, self.pub_callback, self.exception_callback)
+
+        self.stream_handle.close()
 
         # This case tests against a header that does not match global, but matches coastal
         # 0001 0000 0000 0000 0001 0001 0000 0000
-        fid = open(os.path.join(RESOURCE_PATH, 'E0000001-BAD-HEADER2.DAT'), 'rb')
-        test_buffer = fid.read()
-        fid.close()
+        file_path = os.path.join(RESOURCE_PATH, 'E0000001-BAD-HEADER2.DAT')
+        self.stream_handle = open(file_path, 'rb')
 
-        self.stream_handle = StringIO(test_buffer)
         with self.assertRaises(SampleException):
             self.parser = DostaLnWfpParser(self.config, self.start_state, self.stream_handle,
                                            self.state_callback, self.pub_callback, self.exception_callback)
+
+        self.stream_handle.close()
 
 
     def assert_result(self, test, particle):
@@ -283,9 +296,15 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
             if key == 'internal_timestamp':
                 particle_data = particle.get_value('internal_timestamp')
                 #the timestamp is in the header part of the particle
+
+                log.info("internal_timestamp %d", particle_data)
+
             elif key == 'position':
                 particle_data = self.state_callback_value['position']
                 #position corresponds to the position in the file
+
+                log.info("position %d", particle_data)
+
             else:
                 particle_data = particle_values.get(key)
                 #others are all part of the parsed values part of the particle
