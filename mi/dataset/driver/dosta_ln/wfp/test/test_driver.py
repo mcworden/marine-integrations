@@ -190,25 +190,27 @@ class QualificationTest(DataSetQualificationTestCase):
         Setup an agent/driver/harvester/parser and verify that data is
         published out the agent
         """
-        self.create_sample_data('small.DAT', 'E0000001.DAT')
-        # self.assert_initialize(final_state=ResourceAgentState.COMMAND)
-        #
-        # # NOTE: If the processing is not slowed down here, the engineering samples are
-        # # returned in the wrong order
-        # self.dataset_agent_client.set_resource({DriverParameter.RECORDS_PER_SECOND: 1})
-        # self.assert_start_sampling()
+        log.info("CONFIG: %s", self._agent_config())
 
-        # Puts into SAMPLING mode
+        # Ensure all prior sample data does not exist
+        self.clear_sample_data()
+
+        # Create a sample input file using a small input test file that contains 6 samples.
+        self.create_sample_data('small.DAT', 'E0000001.DAT')
+
+        # Put the agent into SAMPLING mode and ensure the agent is initialized
         self.assert_initialize()
 
         # Verify we get one sample
         try:
-            # Get fours records
+
+            # Try to get 6 records
             result = self.data_subscribers.get_samples(DataParticleType.INSTRUMENT, 6)
             log.debug("First RESULT: %s", result)
 
-            # Verify values
+            # Verify the 6 retrieved records against the expected results
             self.assert_data_values(result, 'six_samples.yml')
+
         except Exception as e:
             log.error("Exception trapped: %s", e)
             self.fail("Sample timeout.")
@@ -218,7 +220,16 @@ class QualificationTest(DataSetQualificationTestCase):
         """
         Test importing a large number of samples from the file at once
         """
+        log.info("CONFIG: %s", self._agent_config())
+
+        # Ensure all prior sample data does not exist
+        self.clear_sample_data()
+
+        # Create a sample input file using a test input file that includes an OffloadProcessorData record that
+        # includes a decimation factor
         self.create_sample_data('E0000002.DAT', 'E0000002.DAT')
+
+        # Put the agent into SAMPLING mode and ensure the agent is initialized
         self.assert_initialize()
 
         try:
@@ -231,6 +242,9 @@ class QualificationTest(DataSetQualificationTestCase):
             # Attempt to retrieve the remaining 283 samples using a 500 second timeout
             self.data_subscribers.get_samples(DataParticleType.INSTRUMENT, 283, 500)
 
+            # There should be 0 elements remaining in the queue
+            self.assert_sample_queue_size(DataParticleType.INSTRUMENT, 0)
+
         except Exception as e:
             log.error("Exception trapped: %s", e)
             self.fail("Sample timeout.")
@@ -242,8 +256,14 @@ class QualificationTest(DataSetQualificationTestCase):
         at the correct spot.
         """
         log.info("CONFIG: %s", self._agent_config())
+
+        # Ensure all prior sample data does not exist
+        self.clear_sample_data()
+
+        # Create a sample input file using a test file that contains one sample
         self.create_sample_data('one.DAT', "E0000001.DAT")
 
+        # Put the agent into SAMPLING mode and ensure the agent is initialized
         self.assert_initialize()
 
         # Verify we get one sample
@@ -262,6 +282,8 @@ class QualificationTest(DataSetQualificationTestCase):
             # Now read the first four records of the second file then stop
             result2 = self.data_subscribers.get_samples(DataParticleType.INSTRUMENT, 4)
             log.debug("RESULT 2: %s", result2)
+
+            # Stop the agent from doing sampling
             self.assert_stop_sampling()
 
             # There should be 2 items remaining on the queue
@@ -269,9 +291,11 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Restart sampling and ensure we get the last 2 records of the file
             self.assert_start_sampling()
+
             result3 = self.data_subscribers.get_samples(DataParticleType.INSTRUMENT, 2)
             log.debug("RESULT 3: %s", result3)
-            result.extend(result3)
+
+            # Make sure the two samples match the expected results
             self.assert_data_values(result3, 'two_samples.yml')
 
             # There should be 0 elements in the queue
@@ -288,8 +312,13 @@ class QualificationTest(DataSetQualificationTestCase):
         and confirm it restarts at the correct spot.
         """
         log.info("CONFIG: %s", self._agent_config())
+
+        # Ensure all prior sample data does not exist
+        self.clear_sample_data()
+
         self.create_sample_data('one.DAT', "E0000001.DAT")
 
+        # Put the agent into SAMPLING mode and ensure the agent is initialized
         self.assert_initialize()
 
         # Verify we get one sample
@@ -322,9 +351,10 @@ class QualificationTest(DataSetQualificationTestCase):
             # Restart sampling and ensure we get the last 2 records of the file
             self.assert_start_sampling()
 
+            # Attempt to retrieve 2 samples
             result3 = self.data_subscribers.get_samples(DataParticleType.INSTRUMENT, 2)
             log.debug("RESULT 3: %s", result3)
-            result.extend(result3)
+
             self.assert_data_values(result3, 'two_samples.yml')
 
             # There should be 0 elements in the queue
@@ -339,18 +369,29 @@ class QualificationTest(DataSetQualificationTestCase):
         Test an exception is raised after the driver is started during
         record parsing.
         """
+
+        # Ensure all prior sample data does not exist
         self.clear_sample_data()
+
+        # Create a sample input file that should result in a SampleException
         self.create_sample_data('E0000001-BAD-DATA.DAT', 'E0000001.DAT')
+
+        # Create a sample input file that has one sample
         self.create_sample_data('one.DAT', 'E0000002.DAT')
 
+        # Put the agent into SAMPLING mode and ensure the agent is initialized
         self.assert_initialize()
 
+        # Clear any prior events
         self.event_subscribers.clear_events()
+
+        # Attempt to retrieve one sample
         result = self.get_samples(DataParticleType.INSTRUMENT, 1)
 
+        # Check to make sure the one sample matches the expected results
         self.assert_data_values(result, 'first.yml')
 
-        # There should be 0 elements in the queue
+        # There should be 0 elements in the queue now
         self.assert_sample_queue_size(DataParticleType.INSTRUMENT, 0)
 
         # Verify an event was raised and we are in our retry state
