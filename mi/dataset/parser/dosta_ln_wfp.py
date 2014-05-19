@@ -22,9 +22,9 @@ import struct
 from mi.core.log import get_logger
 log = get_logger()
 from mi.core.common import BaseEnum
-from mi.core.instrument.data_particle import DataParticle, DataParticleKey
-from mi.core.exceptions import SampleException, DatasetParserException, UnexpectedDataException
-from mi.dataset.parser.WFP_E_file_common import WfpEFileParser, StateKey, HEADER_BYTES, STATUS_BYTES_AUGMENTED, \
+from mi.core.instrument.data_particle import DataParticle
+from mi.core.exceptions import SampleException, UnexpectedDataException
+from mi.dataset.parser.WFP_E_file_common import WfpEFileParser, HEADER_BYTES, STATUS_BYTES_AUGMENTED, \
     STATUS_BYTES, STATUS_START_MATCHER
 
 # This regex will be used to match the flags for the global wfp e engineering record:
@@ -185,16 +185,19 @@ class DostaLnWfpParser(WfpEFileParser):
             # Check for an an augmented status first
             if raw_data_start_index_augmented >= 0 and \
                     STATUS_START_MATCHER.match(raw_data[raw_data_start_index_augmented:parse_end_point]):
+                log.debug("Found OffloadProcessorData with decimation factor")
                 parse_end_point = raw_data_start_index_augmented
 
             # Check for a normal status
             elif raw_data_start_index_normal >= 0 and \
                     STATUS_START_MATCHER.match(raw_data[raw_data_start_index_normal:parse_end_point]):
+                log.debug("Found OffloadProcessorData without decimation factor")
                 parse_end_point = raw_data_start_index_normal
 
             # If neither, we are dealing with a global wfp e recovered engineering data record,
             # so we will save the start and end points
             elif global_recovered_eng_rec_index >= 0:
+                log.debug("Found OffloadEngineeringData without decimation factor")
                 form_list.append((global_recovered_eng_rec_index, parse_end_point))
                 parse_end_point = global_recovered_eng_rec_index
 
