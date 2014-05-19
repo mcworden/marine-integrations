@@ -20,8 +20,8 @@ from mi.core.exceptions import SampleException
 
 from mi.dataset.test.test_parser import ParserUnitTestCase
 from mi.dataset.dataset_driver import DataSetDriverConfigKeys
-from mi.dataset.parser.WFP_E_file_common import HEADER_BYTES
-from mi.dataset.parser.dosta_ln_wfp import DostaLnWfpParser, StateKey, WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_BYTES
+from mi.dataset.parser.WFP_E_file_common import HEADER_BYTES, StateKey
+from mi.dataset.parser.dosta_ln_wfp import DostaLnWfpParser, WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_BYTES
 
 RESOURCE_PATH = os.path.join(Config().base_dir(), 'mi', 'dataset', 'driver', 'dosta_ln', 'wfp', 'resource')
 
@@ -149,11 +149,11 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
         """
         Test a long stream 
         """
-        file_path = os.path.join(RESOURCE_PATH, 'E0000001.DAT')
+        file_path = os.path.join(RESOURCE_PATH, 'E0000002.DAT')
         self.stream_handle = open(file_path, 'rb')
 
         self.parser = DostaLnWfpParser(self.config, self.start_state, self.stream_handle,
-                                     self.state_callback, self.pub_callback, self.exception_callback)
+                                       self.state_callback, self.pub_callback, self.exception_callback)
 
         particles = self.parser.get_records(1000)
 
