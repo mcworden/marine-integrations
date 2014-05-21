@@ -30,7 +30,9 @@ from mi.dataset.dataset_driver import DriverParameter
 
 from mi.dataset.dataset_driver import DataSourceConfigKey, DataSetDriverConfigKeys
 from mi.dataset.driver.dosta_ln.wfp.driver import DostaLnWfpDataSetDriver
-from mi.dataset.parser.dosta_ln_wfp import HEADER_BYTES, DataParticleType, WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_BYTES
+from mi.dataset.parser.dosta_ln_wfp import HEADER_BYTES, DataParticleType, \
+    WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_BYTES, DostaLnWfpInstrumentParserDataParticle
+
 from pyon.agent.agent import ResourceAgentState
 from interface.objects import ResourceAgentErrorEvent
 
@@ -80,22 +82,22 @@ class IntegrationTest(DataSetIntegrationTestCase):
 
         self.clear_async_data()
         self.create_sample_data('E0000001.DAT', "E0000001.DAT")
-        self.assert_data(None, 'first.yml', count=1, timeout=10)
+        self.assert_data(DostaLnWfpInstrumentParserDataParticle, 'first.yml', count=1, timeout=10)
 
         # Read the remaining values in first.DAT
-        self.assert_data(None, None, count=682, timeout=100)
+        self.assert_data(DostaLnWfpInstrumentParserDataParticle, None, count=682, timeout=100)
 
         self.clear_async_data()
         self.create_sample_data('E0000002.DAT', "E0000002.DAT")
-        self.assert_data(None, 'six_samples.yml', count=6, timeout=10)
+        self.assert_data(DostaLnWfpInstrumentParserDataParticle, 'six_samples.yml', count=6, timeout=10)
 
         # Read the remaining values in second.DAT
-        self.assert_data(None, None, count=677, timeout=100)
+        self.assert_data(DostaLnWfpInstrumentParserDataParticle, None, count=677, timeout=100)
 
         self.clear_async_data()
         self.create_sample_data('E0000001.DAT', "E0000003.DAT")
         # start is the same particle here, just use the same results
-        self.assert_data(None, count=30, timeout=10)
+        self.assert_data(DostaLnWfpInstrumentParserDataParticle, count=30, timeout=10)
 
     def test_stop_resume(self):
         """
@@ -120,7 +122,7 @@ class IntegrationTest(DataSetIntegrationTestCase):
         self.driver.start_sampling()
 
         # verify data is produced
-        self.assert_data(None, 'two_samples.yml', count=2, timeout=10)
+        self.assert_data(DostaLnWfpInstrumentParserDataParticle, 'two_samples.yml', count=2, timeout=10)
 
 
     def test_stop_start_resume(self):
@@ -136,10 +138,10 @@ class IntegrationTest(DataSetIntegrationTestCase):
         self.create_sample_data('E0000002.DAT', "E0000002.DAT")
 
         # Read the first record and compare it
-        self.assert_data(None, 'first.yml', count=1, timeout=10)
+        self.assert_data(DostaLnWfpInstrumentParserDataParticle, 'first.yml', count=1, timeout=10)
 
         # Read the the remaining 682 records from E0000001.DAT, plus 4 additional from E0000002.DAT
-        self.assert_data(None, None, count=686, timeout=100)
+        self.assert_data(DostaLnWfpInstrumentParserDataParticle, None, count=686, timeout=100)
 
         # Ensure it is true that E0000001.DAT was fully ingested
         self.assert_file_ingested("E0000001.DAT")
@@ -151,10 +153,10 @@ class IntegrationTest(DataSetIntegrationTestCase):
         self.driver.start_sampling()
 
         # Read 2 records and compare them
-        self.assert_data(None, 'two_samples.yml', count=2, timeout=10)
+        self.assert_data(DostaLnWfpInstrumentParserDataParticle, 'two_samples.yml', count=2, timeout=10)
 
         # Read the remaining 677 records from E0000002.DAT
-        self.assert_data(None, None, count=677, timeout=100)
+        self.assert_data(DostaLnWfpInstrumentParserDataParticle, None, count=677, timeout=100)
 
         # Ensure it is true that E0000002.DAT was fully ingested
         self.assert_file_ingested("E0000002.DAT")
