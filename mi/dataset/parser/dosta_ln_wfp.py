@@ -33,7 +33,7 @@ from mi.dataset.parser.WFP_E_file_common import WfpEFileParser, HEADER_BYTES, ST
 WFP_E_GLOBAL_FLAGS_HEADER_REGEX = b'(\x00\x01\x00{5}\x01\x00{7}\x01)([\x00-\xff]{8})'
 WFP_E_GLOBAL_FLAGS_HEADER_MATCHER = re.compile(WFP_E_GLOBAL_FLAGS_HEADER_REGEX)
 
-# starts with ensuring that there is no indicator, after that, the data consists of variable 26 bytes
+# Includes indicator/timestamp and the data consists of variable 26 bytes
 WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_REGEX = b'([\x00-\xff]{4})([\x00-\xff]{26})'
 WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_MATCHER = re.compile(WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_REGEX)
 
@@ -46,8 +46,8 @@ class DataParticleType(BaseEnum):
 
 
 class DostaLnWfpInstrumentParserDataParticleKey(BaseEnum):
-    OPTODE_OXYGEN = 'optode_oxygen'
-    OPTODE_TEMPERATUURE = 'optode_temperature'
+    ESTIMATED_OXYGEN_CONCENTRATION = 'estimated_oxygen_concentration'
+    OPTODE_TEMPERATURE = 'optode_temperature'
     WFP_TIMESTAMP = 'wfp_timestamp'
 
 
@@ -74,13 +74,13 @@ class DostaLnWfpInstrumentParserDataParticle(DataParticle):
         try:
             # Let's first get the 32-bit unsigned int timestamp which should be in the first match group
             fields_prof = struct.unpack_from('>I', match.group(1))
-            wfp_timestamp = int(fields_prof[0])
+            wfp_timestamp = fields_prof[0]
 
             # Now let's grab the global engineering data record match group
             # Should be 5 float 32-bit values followed by 3 unsigned int 16-bit values
             fields_prof = struct.unpack_from('>fffffHHH', match.group(2))
             # the optode_oxygen field should be the 4th value
-            optode_oxygen = fields_prof[3]
+            estimated_oxygen_concentration = fields_prof[3]
             # the optode_oxygen field should be the 5th value
             optode_temperature = fields_prof[4]
 
@@ -88,8 +88,9 @@ class DostaLnWfpInstrumentParserDataParticle(DataParticle):
             raise SampleException("Error (%s) while decoding parameters in data: [%s]"
                                   % (ex, match.group(0)))
 
-        result = [self._encode_value(DostaLnWfpInstrumentParserDataParticleKey.OPTODE_OXYGEN, optode_oxygen, float),
-                  self._encode_value(DostaLnWfpInstrumentParserDataParticleKey.OPTODE_TEMPERATUURE,
+        result = [self._encode_value(DostaLnWfpInstrumentParserDataParticleKey.ESTIMATED_OXYGEN_CONCENTRATION,
+                                     estimated_oxygen_concentration, float),
+                  self._encode_value(DostaLnWfpInstrumentParserDataParticleKey.OPTODE_TEMPERATURE,
                                      optode_temperature, float),
                   self._encode_value(DostaLnWfpInstrumentParserDataParticleKey.WFP_TIMESTAMP,
                                      wfp_timestamp, int)]
@@ -197,7 +198,7 @@ class DostaLnWfpParser(WfpEFileParser):
             # If neither, we are dealing with a global wfp e recovered engineering data record,
             # so we will save the start and end points
             elif global_recovered_eng_rec_index >= 0:
-                log.debug("Found OffloadEngineeringData without decimation factor")
+                log.debug("Found OffloadEngineeringData")
                 form_list.append((global_recovered_eng_rec_index, parse_end_point))
                 parse_end_point = global_recovered_eng_rec_index
 
