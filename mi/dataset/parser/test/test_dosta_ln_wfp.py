@@ -21,12 +21,14 @@ from mi.core.exceptions import SampleException
 from mi.dataset.test.test_parser import ParserUnitTestCase
 from mi.dataset.dataset_driver import DataSetDriverConfigKeys
 from mi.dataset.parser.WFP_E_file_common import HEADER_BYTES, StateKey
-from mi.dataset.parser.dosta_ln_wfp import DostaLnWfpParser, WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_BYTES
+from mi.dataset.parser.dosta_ln_wfp import DostaLnWfpParser, WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_BYTES, \
+    DostaLnWfpInstrumentParserDataParticleKey
 
 RESOURCE_PATH = os.path.join(Config().base_dir(), 'mi', 'dataset', 'driver', 'dosta_ln', 'wfp', 'resource')
 
 # The list of generated tests are the suggested tests, but there may
 # be other tests needed to fully test your parser
+
 
 @attr('UNIT', group='mi')
 class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
@@ -49,7 +51,7 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
     def setUp(self):
         ParserUnitTestCase.setUp(self)
         self.config = {
-        DataSetDriverConfigKeys.PARTICLE_MODULE: 'mi.dataset.parser.dosta_ln_wfp',
+            DataSetDriverConfigKeys.PARTICLE_MODULE: 'mi.dataset.parser.dosta_ln_wfp',
             DataSetDriverConfigKeys.PARTICLE_CLASS: 'DostaLnWfpInstrumentParserDataParticle'
         }
         # Define test data particles and their associated timestamps which will be 
@@ -64,30 +66,34 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
         self.test_particle1 = {}
         self.test_particle1['internal_timestamp'] = 3583638177
         self.test_particle1[StateKey.POSITION] = 204
-        self.test_particle1['optode_oxygen'] = 154.23699951171875
-        self.test_particle1['optode_temperature'] = 1.4819999933242798
-        self.test_particle1['wfp_timestamp'] = 1374649377
+        self.test_particle1[DostaLnWfpInstrumentParserDataParticleKey.ESTIMATED_OXYGEN_CONCENTRATION] = \
+            154.23699951171875
+        self.test_particle1[DostaLnWfpInstrumentParserDataParticleKey.OPTODE_TEMPERATURE] = 1.4819999933242798
+        self.test_particle1[DostaLnWfpInstrumentParserDataParticleKey.WFP_TIMESTAMP] = 1374649377
 
         self.test_particle2 = {}
         self.test_particle2['internal_timestamp'] = 3583638247
         self.test_particle2[StateKey.POSITION] = 414
-        self.test_particle2['optode_oxygen'] = 153.7899932861328
-        self.test_particle2['optode_temperature'] = 1.4950000047683716
-        self.test_particle2['wfp_timestamp'] = 1374649447
+        self.test_particle2[DostaLnWfpInstrumentParserDataParticleKey.ESTIMATED_OXYGEN_CONCENTRATION] = \
+            153.7899932861328
+        self.test_particle2[DostaLnWfpInstrumentParserDataParticleKey.OPTODE_TEMPERATURE] = 1.4950000047683716
+        self.test_particle2[DostaLnWfpInstrumentParserDataParticleKey.WFP_TIMESTAMP] = 1374649447
 
         self.test_particle3 = {}
         self.test_particle3['internal_timestamp'] = 3583638317
         self.test_particle3[StateKey.POSITION] = 624
-        self.test_particle3['optode_oxygen'] = 153.41099548339844
-        self.test_particle3['optode_temperature'] = 1.5
-        self.test_particle3['wfp_timestamp'] = 1374649517
+        self.test_particle3[DostaLnWfpInstrumentParserDataParticleKey.ESTIMATED_OXYGEN_CONCENTRATION] = \
+            153.41099548339844
+        self.test_particle3[DostaLnWfpInstrumentParserDataParticleKey.OPTODE_TEMPERATURE] = 1.5
+        self.test_particle3[DostaLnWfpInstrumentParserDataParticleKey.WFP_TIMESTAMP] = 1374649517
 
         self.test_particle4 = {}
         self.test_particle4['internal_timestamp'] = 3583638617
         self.test_particle4[StateKey.POSITION] = 1524
-        self.test_particle4['optode_oxygen'] = 152.13600158691406
-        self.test_particle4['optode_temperature'] = 1.5019999742507935
-        self.test_particle4['wfp_timestamp'] = 1374649817
+        self.test_particle4[DostaLnWfpInstrumentParserDataParticleKey.ESTIMATED_OXYGEN_CONCENTRATION] = \
+            152.13600158691406
+        self.test_particle4[DostaLnWfpInstrumentParserDataParticleKey.OPTODE_TEMPERATURE] = 1.5019999742507935
+        self.test_particle4[DostaLnWfpInstrumentParserDataParticleKey.WFP_TIMESTAMP] = 1374649817
 
 
     def test_simple(self):
