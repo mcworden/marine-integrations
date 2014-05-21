@@ -11,16 +11,27 @@ initial release
 __author__ = 'Mark Worden'
 __license__ = 'Apache 2.0'
 
-import string
 
-from mi.core.log import get_logger ; log = get_logger()
+from mi.core.log import get_logger
+log = get_logger()
 
 from mi.dataset.dataset_driver import SimpleDataSetDriver
 from mi.dataset.parser.dosta_ln_wfp import DostaLnWfpParser, DostaLnWfpInstrumentParserDataParticle
 from mi.dataset.harvester import SingleDirectoryHarvester
 
+
 class DostaLnWfpDataSetDriver(SimpleDataSetDriver):
-    
+
+    def __init__(self, config, memento, data_callback, state_callback, event_callback, exception_callback):
+        super(DostaLnWfpDataSetDriver, self).__init__(config,
+                                                      memento,
+                                                      data_callback,
+                                                      state_callback,
+                                                      event_callback,
+                                                      exception_callback)
+
+        self._parser = None
+
     @classmethod
     def stream_config(cls):
         return [DostaLnWfpInstrumentParserDataParticle.type()]
@@ -49,7 +60,6 @@ class DostaLnWfpDataSetDriver(SimpleDataSetDriver):
         """
         Build and return the harvester
         """
-        # *** Replace the following with harvester initialization ***
         self._harvester = SingleDirectoryHarvester(
             self._harvester_config,
             driver_state,
