@@ -121,7 +121,6 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
 
         self.stream_handle.close()
 
-
     def test_get_many(self):
         """
         Read test data and pull out multiple data particles at one time.
@@ -142,14 +141,12 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
 
         particles = self.parser.get_records(30)
 
-        # Should end up with 20 particles
+        # Should end up with 30 particles
         self.assertTrue(len(particles) == 30)
 
         self.assert_result(self.test_particle4, particles[29])
 
         self.stream_handle.close()
-
-
 
     def test_long_stream(self):
         """
@@ -167,8 +164,6 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
         self.assertTrue(len(particles) == 683)
 
         self.stream_handle.close()
-
-
 
     def test_mid_state_start(self):
         """
@@ -191,8 +186,6 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
         self.assert_result(self.test_particle1, particles[3])
 
         self.stream_handle.close()
-
-
 
     def test_set_state(self):
         """
@@ -231,7 +224,6 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
 
         self.stream_handle.close()
 
-
     def test_bad_data(self):
         """
         Ensure that bad data is skipped when it exists.
@@ -247,8 +239,6 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
              self.parser.get_records(1)
 
         self.stream_handle.close()
-
-
 
     def test_bad_header(self):
         """
@@ -276,7 +266,6 @@ class DostaLnWfpParserUnitTestCase(ParserUnitTestCase):
                                            self.state_callback, self.pub_callback, self.exception_callback)
 
         self.stream_handle.close()
-
 
     def assert_result(self, test, particle):
         """
