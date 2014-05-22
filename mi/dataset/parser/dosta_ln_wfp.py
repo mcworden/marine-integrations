@@ -186,13 +186,13 @@ class DostaLnWfpParser(WfpEFileParser):
             # Check for an an augmented status first
             if raw_data_start_index_augmented >= 0 and \
                     STATUS_START_MATCHER.match(raw_data[raw_data_start_index_augmented:parse_end_point]):
-                log.debug("Found OffloadProcessorData with decimation factor")
+                log.debug("Found OffloadProfileData with decimation factor")
                 parse_end_point = raw_data_start_index_augmented
 
             # Check for a normal status
             elif raw_data_start_index_normal >= 0 and \
                     STATUS_START_MATCHER.match(raw_data[raw_data_start_index_normal:parse_end_point]):
-                log.debug("Found OffloadProcessorData without decimation factor")
+                log.debug("Found OffloadProfileData without decimation factor")
                 parse_end_point = raw_data_start_index_normal
 
             # If neither, we are dealing with a global wfp e recovered engineering data record,
