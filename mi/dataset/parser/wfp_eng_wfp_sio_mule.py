@@ -268,6 +268,8 @@ class WfpEngWfpSioMuleParser(SioMuleParser):
 
                 data_match = DATA_MATCHER.match(chunk[len(header_match.group(0)):])
 
+                controller_timestamp = header_match.group(3)
+
                 if data_match:
 
                     sensor_profile_start_time_data = data_match.group(2)
@@ -279,7 +281,7 @@ class WfpEngWfpSioMuleParser(SioMuleParser):
                         timestamp = fields_prof[0]
 
                         sample = self._extract_sample(WfpEngWfpSioMuleParserDataStartTimeParticle, None,
-                                                      header_match.group(3) +
+                                                      controller_timestamp +
                                                       sensor_profile_start_time_data,
                                                       float(ntplib.system_to_ntp_time(timestamp)))
                         if sample:
@@ -312,7 +314,7 @@ class WfpEngWfpSioMuleParser(SioMuleParser):
                             timestamp = fields_prof[0]
 
                             sample = self._extract_sample(WfpEngWfpSioMuleParserDataStatusParticle, None,
-                                                          header_match.group(3) +
+                                                          controller_timestamp +
                                                           profile_eng_data[start_index_augmented:parse_end_point],
                                                           float(ntplib.system_to_ntp_time(timestamp)))
 
@@ -328,7 +330,7 @@ class WfpEngWfpSioMuleParser(SioMuleParser):
                             timestamp = fields_prof[0]
 
                             sample = self._extract_sample(WfpEngWfpSioMuleParserDataStatusParticle, None,
-                                                          header_match.group(3) +
+                                                          controller_timestamp +
                                                           profile_eng_data[start_index_normal:parse_end_point],
                                                           float(ntplib.system_to_ntp_time(timestamp)))
 
