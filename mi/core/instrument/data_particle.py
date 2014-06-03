@@ -307,6 +307,7 @@ class DataParticle(object):
 
         try:
             encoded_val = encoding_function(value)
+            log.info(encoded_val)
         except Exception as e:
             log.error("Data particle error encoding. Name:%s Value:%s", name, value)
             self._encoding_errors.append({name: value})

@@ -42,8 +42,8 @@ class DataParticleType(BaseEnum):
 
 class WfpEngWfpSioMuleParserDataStartTimeParticleKey(BaseEnum):
     CONTROLLER_TIMESTAMP = 'controller_timestamp'
-    WFP_SENSOR_START = 'wfp_sensor_start '
-    WFP_PROFILE_START = 'wfp_profile_start '
+    WFP_SENSOR_START = 'wfp_sensor_start'
+    WFP_PROFILE_START = 'wfp_profile_start'
 
 
 class WfpEngWfpSioMuleParserDataStatusParticleKey(BaseEnum):

@@ -26,7 +26,7 @@ from mi.dataset.parser.wfp_eng_wfp_sio_mule import WfpEngWfpSioMuleParser
 from mi.dataset.parser.wfp_eng_wfp_sio_mule import WfpEngWfpSioMuleParserDataEngineeringParticleKey, \
     WfpEngWfpSioMuleParserDataStartTimeParticleKey, WfpEngWfpSioMuleParserDataStatusParticleKey
 
-RESOURCE_PATH = os.path.join(Config().base_dir(), 'mi', 'dataset', 'driver', 'WFP_ENG', 'wfp_sio_mule', 'resource')
+RESOURCE_PATH = os.path.join(Config().base_dir(), 'mi', 'dataset', 'driver', 'WFP_ENG', 'wfp', 'resource')
 
 
 # The list of generated tests are the suggested tests, but there may

@@ -198,7 +198,7 @@ class IntegrationTest(DataSetIntegrationTestCase):
 
         # Create and store the new driver state
         self.memento = {"node59p1.dat": {DriverStateKey.FILE_SIZE: 911,
-                        DriverStateKey.FILE_CHECKSUM: '8b7cf73895eded0198b3f3621f962abc',
+                        DriverStateKey.FILE_CHECKSUM: '58ac8f19661ff9e09c3a67e74c3e9336',
                         DriverStateKey.FILE_MOD_DATE: mod_time,
                         DriverStateKey.PARSER_STATE: {'in_process_data': [],
                                                      'unprocessed_data':[[0, 172]]}
