@@ -17,8 +17,6 @@ from mi.core.log import get_logger
 log = get_logger()
 from mi.idk.config import Config
 
-#from mi.core.exceptions import SampleException
-
 from mi.dataset.test.test_parser import ParserUnitTestCase
 from mi.dataset.parser.sio_mule_common import StateKey
 from mi.dataset.dataset_driver import DataSetDriverConfigKeys
@@ -95,7 +93,7 @@ class WfpEngWfpSioMuleParserUnitTestCase(ParserUnitTestCase):
 
     def test_simple(self):
         """
-        Read test data and pull out data particles one at a time.
+        Read test data and pull out 5 data particles. Then examine each particle against its expected result.
         Assert that the results are those we expected.
         """
         file_path = os.path.join(RESOURCE_PATH, 'wfp_eng_wfp_sio_mule_small.DAT')

@@ -29,7 +29,7 @@ from mi.dataset.parser.dosta_ln_wfp import WFP_E_GLOBAL_FLAGS_HEADER_REGEX, \
 from mi.dataset.parser.WFP_E_file_common import STATUS_BYTES_AUGMENTED, \
     STATUS_BYTES, STATUS_START_MATCHER
 
-# *** Need to define data regex for this parser ***
+# The regex for a WFP E data block.
 DATA_REGEX = WFP_E_GLOBAL_FLAGS_HEADER_REGEX + '(.*)\x03'
 DATA_MATCHER = re.compile(DATA_REGEX, flags=re.DOTALL)
 
@@ -41,13 +41,13 @@ class DataParticleType(BaseEnum):
 
 
 class WfpEngWfpSioMuleParserDataStartTimeParticleKey(BaseEnum):
-    CONTROLLER_TIMESTAMP = 'controller_timestamp'
+    CONTROLLER_TIMESTAMP = 'sio_controller_timestamp'
     WFP_SENSOR_START = 'wfp_sensor_start'
     WFP_PROFILE_START = 'wfp_profile_start'
 
 
 class WfpEngWfpSioMuleParserDataStatusParticleKey(BaseEnum):
-    CONTROLLER_TIMESTAMP = 'controller_timestamp'
+    CONTROLLER_TIMESTAMP = 'sio_controller_timestamp'
     WFP_INDICATOR = 'wfp_indicator'
     WFP_RAMP_STATUS = 'wfp_ramp_status'
     WFP_PROFILE_STATUS = 'wfp_profile_status'

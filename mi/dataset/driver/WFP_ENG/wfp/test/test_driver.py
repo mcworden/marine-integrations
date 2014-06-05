@@ -37,10 +37,9 @@ from mi.dataset.parser.wfp_eng_wfp_sio_mule import WfpEngWfpSioMuleParserDataSta
     WfpEngWfpSioMuleParserDataStatusParticle, \
     WfpEngWfpSioMuleParserDataEngineeringParticle
 from mi.dataset.parser.wfp_eng_wfp_sio_mule import DataParticleType as WfpEngWfpSioMuleDataParticleType
-from mi.dataset.parser.wfp_eng__stc_imodem import Wfp_eng__stc_imodem_statusParserDataParticle, \
-    Wfp_eng__stc_imodem_startParserDataParticle, \
-    Wfp_eng__stc_imodem_engineeringParserDataParticle
-from mi.dataset.parser.wfp_eng__stc_imodem import DataParticleType as WfpEngStcImodemDataParticleType
+from mi.dataset.parser.wfp_eng__stc_imodem_particles import WfpEngStcImodemStatusRecoveredDataParticle, \
+    WfpEngStcImodemStartRecoveredDataParticle, WfpEngStcImodemEngineeringRecoveredDataParticle
+from mi.dataset.parser.wfp_eng__stc_imodem_particles import DataParticleType as WfpEngStcImodemDataParticleType
 from mi.dataset.parser.sio_mule_common import StateKey
 
 RESOURCE_PATH = os.path.join(Config().base_dir(), 'mi', 'dataset', 'driver', 'WFP_ENG', 'wfp', 'resource')
@@ -82,9 +81,9 @@ DataSetTestCase.initialize(
 
 PARSER_STATE = 'parser_state'
 
-REC_PARTICLES = (Wfp_eng__stc_imodem_statusParserDataParticle,
-                 Wfp_eng__stc_imodem_startParserDataParticle,
-                 Wfp_eng__stc_imodem_engineeringParserDataParticle)
+REC_PARTICLES = (WfpEngStcImodemStatusRecoveredDataParticle,
+                 WfpEngStcImodemStartRecoveredDataParticle,
+                 WfpEngStcImodemEngineeringRecoveredDataParticle)
 TEL_PARTICLES = (WfpEngWfpSioMuleParserDataStartTimeParticle,
                  WfpEngWfpSioMuleParserDataStatusParticle,
                  WfpEngWfpSioMuleParserDataEngineeringParticle)
@@ -145,7 +144,7 @@ class IntegrationTest(DataSetIntegrationTestCase):
         self.create_sample_data_set_dir(telem_file1, DIR_TEL, FILE_TEL)
 
         # Make sure we receive the correct recovered particle
-        self.assert_data(Wfp_eng__stc_imodem_startParserDataParticle, 'recovered.part1.yml',
+        self.assert_data(WfpEngStcImodemStartRecoveredDataParticle, 'recovered.part1.yml',
                          count=1, timeout=10)
 
         # Make sure we receive the correct telemetered particles
@@ -161,7 +160,7 @@ class IntegrationTest(DataSetIntegrationTestCase):
         self.create_sample_data_set_dir(telem_file2, DIR_TEL, FILE_TEL)
 
         # Make sure we receive the correct recovered particle
-        self.assert_data(Wfp_eng__stc_imodem_engineeringParserDataParticle, 'recovered.part2.yml',
+        self.assert_data(WfpEngStcImodemEngineeringRecoveredDataParticle, 'recovered.part2.yml',
                          count=1, timeout=10)
 
         # Make sure we receive the correct telemetered particle
@@ -190,7 +189,7 @@ class IntegrationTest(DataSetIntegrationTestCase):
         self.create_sample_data_set_dir(telem_file1, DIR_TEL, FILE_TEL)
 
         # Make sure we receive the correct recovered particle
-        self.assert_data(Wfp_eng__stc_imodem_startParserDataParticle, 'recovered.part1.yml',
+        self.assert_data(WfpEngStcImodemStartRecoveredDataParticle, 'recovered.part1.yml',
                          count=1, timeout=10)
 
         # Make sure we receive the correct telemetered particles
@@ -258,7 +257,7 @@ class IntegrationTest(DataSetIntegrationTestCase):
         self.driver.start_sampling()
 
         # Check to make sure we received the correct recovered particles
-        self.assert_data(Wfp_eng__stc_imodem_engineeringParserDataParticle, 'recovered.stop_resume.yml',
+        self.assert_data(WfpEngStcImodemEngineeringRecoveredDataParticle, 'recovered.stop_resume.yml',
                          count=2, timeout=10)
 
         # Check to make sure we received a correct telemetered data particle
