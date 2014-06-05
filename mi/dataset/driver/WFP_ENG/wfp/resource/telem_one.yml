@@ -7,6 +7,6 @@ data:
     particle_object: WfpEngWfpSioMuleParserDataStartTimeParticle
     particle_type: wfp_eng_wfp_sio_mule_start_time
     internal_timestamp: 3583825326.0
-    controller_timestamp: 1374837724
+    sio_controller_timestamp: 1374837724
     wfp_profile_start: 1374836526
     wfp_sensor_start: 1374836403

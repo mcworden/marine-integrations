@@ -11,9 +11,3 @@ data:
     wfp_prof_current: 0.0
     wfp_prof_voltage: 11.584400177001953
     wfp_prof_pressure: 0.0
-#    particle_object: WfpEngWfpSioMuleParserDataStartTimeParticle
-#    particle_type: wfp_eng_wfp_sio_mule_start_time
-#    internal_timestamp:  3583839726.000000000
-#    controller_timestamp: 1374857307
-#    wfp_profile_start: 1374850926
-#    wfp_sensor_start: 1374850803
