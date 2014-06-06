@@ -78,9 +78,12 @@ class WfpEngWfp(SioMuleDataSetDriver):
         if data_key == DataTypeKey.WFP_ENG_STC_IMODEM:
             config.update({
                 'particle_module': 'mi.dataset.parser.wfp_eng__stc_imodem_particles',
-                'particle_class': ['WfpEngStcImodemStatusRecoveredDataParticle',
-                                   'WfpEngStcImodemStartRecoveredDataParticle',
-                                   'WfpEngStcImodemEngineeringRecoveredDataParticle']
+                'particle_class': None,
+                'particle_classes_dict': {
+                    'status_data_particle_class': WfpEngStcImodemStatusRecoveredDataParticle,
+                    'start_data_particle_class': WfpEngStcImodemStartRecoveredDataParticle,
+                    'engineering_data_particle_class': WfpEngStcImodemEngineeringRecoveredDataParticle
+                }
             })
 
             parser = WfpEngStcImodemParser(
@@ -88,10 +91,7 @@ class WfpEngWfp(SioMuleDataSetDriver):
                 lambda state, ingested:
                 self._save_parser_state(state, data_key, ingested),
                 self._data_callback,
-                self._sample_exception_callback,
-                start_data_particle_class=WfpEngStcImodemStartRecoveredDataParticle,
-                status_data_particle_class=WfpEngStcImodemStatusRecoveredDataParticle,
-                engineering_data_particle_class=WfpEngStcImodemEngineeringRecoveredDataParticle)
+                self._sample_exception_callback)
 
         #
         # If the key is WFP_ENG_WFP_SIO_MULE, build the WFP SIO Mule parser.
