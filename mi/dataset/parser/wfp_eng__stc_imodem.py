@@ -34,9 +34,11 @@ class WfpEngStcImodemParser(WfpEFileParser):
                  publish_callback,
                  *args, **kwargs):
         self._saved_header = None
-        self._start_data_particle_class = kwargs.pop('start_data_particle_class')
-        self._status_data_particle_class = kwargs.pop('status_data_particle_class')
-        self._engineering_data_particle_class = kwargs.pop('engineering_data_particle_class')
+        log.info(config)
+        particle_classes_dict = config.get('particle_classes_dict')
+        self._start_data_particle_class = particle_classes_dict.get('start_data_particle_class')
+        self._status_data_particle_class = particle_classes_dict.get('status_data_particle_class')
+        self._engineering_data_particle_class = particle_classes_dict.get('engineering_data_particle_class')
         super(WfpEngStcImodemParser, self).__init__(config,
                                                     state,
                                                     stream_handle,
