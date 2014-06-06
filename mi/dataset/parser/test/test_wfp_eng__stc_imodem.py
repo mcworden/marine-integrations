@@ -18,6 +18,7 @@ log = get_logger()
 from mi.core.exceptions import SampleException
 from mi.dataset.test.test_parser import ParserUnitTestCase
 from mi.dataset.dataset_driver import DataSetDriverConfigKeys
+from mi.dataset.driver.WFP_ENG.STC_IMODEM.driver import DataTypeKey
 from mi.dataset.parser.WFP_E_file_common import StateKey
 from mi.dataset.parser.wfp_eng__stc_imodem import WfpEngStcImodemParser
 from mi.dataset.parser.wfp_eng__stc_imodem_particles import WfpEngStcImodemStartRecoveredDataParticle
@@ -93,10 +94,24 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
     def setUp(self):
         ParserUnitTestCase.setUp(self)
         self.config = {
-            DataSetDriverConfigKeys.PARTICLE_MODULE: 'mi.dataset.parser.wfp_eng__stc_imodem',
-            DataSetDriverConfigKeys.PARTICLE_CLASS: ['Wfp_eng__stc_imodem_statusParserDataParticle',
-                                                     'Wfp_eng__stc_imodem_startParserDataParticle',
-                                                     'Wfp_eng__stc_imodem_engineeringParserDataParticle']
+            DataTypeKey.WFP_ENG_STC_IMODEM_RECOVERED: {
+                'particle_module': 'mi.dataset.parser.wfp_eng__stc_imodem_particles',
+                'particle_class': None,
+                'particle_classes_dict': {
+                    'status_data_particle_class': WfpEngStcImodemStatusRecoveredDataParticle,
+                    'start_data_particle_class': WfpEngStcImodemStartRecoveredDataParticle,
+                    'engineering_data_particle_class': WfpEngStcImodemEngineeringRecoveredDataParticle
+                }
+            },
+            DataTypeKey.WFP_ENG_STC_IMODEM_TELEMETERED: {
+                'particle_module': 'mi.dataset.parser.wfp_eng__stc_imodem_particles',
+                'particle_class': None,
+                'particle_classes_dict': {
+                    'status_data_particle_class': WfpEngStcImodemStatusTelemeteredDataParticle,
+                    'start_data_particle_class': WfpEngStcImodemStartTelemeteredDataParticle,
+                    'engineering_data_particle_class': WfpEngStcImodemEngineeringTelemeteredDataParticle
+                }
+            },
         }
 
         self.start_state = {StateKey.POSITION: 0}
@@ -194,11 +209,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_SHORT)
 
         self.parser = WfpEngStcImodemParser(
-            self.config, self.start_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartRecoveredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusRecoveredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringRecoveredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_RECOVERED), self.start_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         # start with the start time record
         result = self.parser.get_records(1)
@@ -230,11 +242,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_SHORT)
 
         self.parser = WfpEngStcImodemParser(
-            self.config, self.start_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartTelemeteredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusTelemeteredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringTelemeteredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_TELEMETERED), self.start_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         # start with the start time record
         result = self.parser.get_records(1)
@@ -265,11 +274,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         """
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_SHORT)
         self.parser = WfpEngStcImodemParser(
-            self.config, self.start_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartRecoveredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusRecoveredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringRecoveredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_RECOVERED), self.start_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         # start with the start time record
         result = self.parser.get_records(1)
@@ -295,11 +301,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         """
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_SHORT)
         self.parser = WfpEngStcImodemParser(
-            self.config, self.start_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartTelemeteredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusTelemeteredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringTelemeteredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_TELEMETERED), self.start_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         # start with the start time record
         result = self.parser.get_records(1)
@@ -325,11 +328,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA)
 
         self.parser = WfpEngStcImodemParser(
-            self.config, self.start_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartRecoveredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusRecoveredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringRecoveredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_RECOVERED), self.start_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         # start with the start time record
         result = self.parser.get_records(1)
@@ -353,11 +353,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA)
 
         self.parser = WfpEngStcImodemParser(
-            self.config, self.start_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartTelemeteredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusTelemeteredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringTelemeteredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_TELEMETERED), self.start_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         # start with the start time record
         result = self.parser.get_records(1)
@@ -381,11 +378,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         new_state = {StateKey.POSITION: 24}
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_SHORT)
         self.parser = WfpEngStcImodemParser(
-            self.config, new_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartRecoveredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusRecoveredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringRecoveredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_RECOVERED), new_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         # get engineering records
         result = self.parser.get_records(1)
@@ -404,11 +398,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         new_state = {StateKey.POSITION: 24}
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_SHORT)
         self.parser = WfpEngStcImodemParser(
-            self.config, new_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartTelemeteredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusTelemeteredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringTelemeteredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_TELEMETERED), new_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         # get engineering records
         result = self.parser.get_records(1)
@@ -427,11 +418,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         new_state = {StateKey.POSITION:76}
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_SHORT)
         self.parser = WfpEngStcImodemParser(
-            self.config, new_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartRecoveredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusRecoveredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringRecoveredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_RECOVERED), new_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         result = self.parser.get_records(1)
         self.assert_result(result, 102, self.particle_c_eng_recov, False)
@@ -445,11 +433,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         new_state = {StateKey.POSITION:76}
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_SHORT)
         self.parser = WfpEngStcImodemParser(
-            self.config, new_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartTelemeteredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusTelemeteredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringTelemeteredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_TELEMETERED), new_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         result = self.parser.get_records(1)
         self.assert_result(result, 102, self.particle_c_eng_telem, False)
@@ -465,11 +450,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         new_state = {StateKey.POSITION: 76}
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_SHORT)
         self.parser = WfpEngStcImodemParser(
-            self.config, self.start_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartRecoveredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusRecoveredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringRecoveredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_RECOVERED), self.start_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         # start with the start time record
         result = self.parser.get_records(1)
@@ -491,11 +473,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         new_state = {StateKey.POSITION: 76}
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_SHORT)
         self.parser = WfpEngStcImodemParser(
-            self.config, self.start_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartTelemeteredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusTelemeteredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringTelemeteredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_TELEMETERED), self.start_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         # start with the start time record
         result = self.parser.get_records(1)
@@ -515,11 +494,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         with self.assertRaises(SampleException):
             self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_BAD_FLAGS)
             self.parser = WfpEngStcImodemParser(
-                self.config, self.start_state, self.stream_handle,
-                self.state_callback, self.pub_callback,
-                start_data_particle_class=WfpEngStcImodemStartRecoveredDataParticle,
-                status_data_particle_class=WfpEngStcImodemStatusRecoveredDataParticle,
-                engineering_data_particle_class=WfpEngStcImodemEngineeringRecoveredDataParticle)
+                self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_RECOVERED), self.start_state, self.stream_handle,
+                self.state_callback, self.pub_callback)
 
     def test_bad_flags_telemetered(self):
         """
@@ -528,11 +504,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         with self.assertRaises(SampleException):
             self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_BAD_FLAGS)
             self.parser = WfpEngStcImodemParser(
-                self.config, self.start_state, self.stream_handle,
-                self.state_callback, self.pub_callback,
-                start_data_particle_class=WfpEngStcImodemStartTelemeteredDataParticle,
-                status_data_particle_class=WfpEngStcImodemStatusTelemeteredDataParticle,
-                engineering_data_particle_class=WfpEngStcImodemEngineeringTelemeteredDataParticle)
+                self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_TELEMETERED), self.start_state, self.stream_handle,
+                self.state_callback, self.pub_callback)
 
     def test_bad_data_recovered(self):
         """
@@ -541,11 +514,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         """
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_BAD_ENG)
         self.parser = WfpEngStcImodemParser(
-            self.config, self.start_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartRecoveredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusRecoveredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringRecoveredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_RECOVERED), self.start_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         # start with the start time record
         result = self.parser.get_records(1)
@@ -563,11 +533,8 @@ class WfpEngStcImodemParserUnitTestCase(ParserUnitTestCase):
         """
         self.stream_handle = StringIO(WfpEngStcImodemParserUnitTestCase.TEST_DATA_BAD_ENG)
         self.parser = WfpEngStcImodemParser(
-            self.config, self.start_state, self.stream_handle,
-            self.state_callback, self.pub_callback,
-            start_data_particle_class=WfpEngStcImodemStartTelemeteredDataParticle,
-            status_data_particle_class=WfpEngStcImodemStatusTelemeteredDataParticle,
-            engineering_data_particle_class=WfpEngStcImodemEngineeringTelemeteredDataParticle)
+            self.config.get(DataTypeKey.WFP_ENG_STC_IMODEM_TELEMETERED), self.start_state, self.stream_handle,
+            self.state_callback, self.pub_callback)
 
         # start with the start time record
         result = self.parser.get_records(1)
