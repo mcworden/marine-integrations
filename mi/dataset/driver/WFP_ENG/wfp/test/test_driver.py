@@ -29,7 +29,6 @@ from mi.idk.config import Config
 from mi.idk.dataset.unit_test import DataSetTestCase
 from mi.idk.dataset.unit_test import DataSetIntegrationTestCase
 from mi.idk.dataset.unit_test import DataSetQualificationTestCase
-from mi.idk.exceptions import SampleTimeout
 
 from mi.dataset.dataset_driver import DataSourceConfigKey, DataSetDriverConfigKeys, DriverStateKey, DriverParameter
 from mi.dataset.driver.WFP_ENG.wfp.driver import WfpEngWfp, DataTypeKey
@@ -74,7 +73,10 @@ DataSetTestCase.initialize(
                 DataSetDriverConfigKeys.FREQUENCY: 1,
             },
         },
-        DataSourceConfigKey.PARSER: {}
+        DataSourceConfigKey.PARSER: {
+            DataTypeKey.WFP_ENG_STC_IMODEM: {},
+            DataTypeKey.WFP_ENG_WFP_SIO_MULE: {},
+        }
     }
 )
 
@@ -302,14 +304,14 @@ class QualificationTest(DataSetQualificationTestCase):
         try:
             # Retrieve one wfp eng imodem start time particle
             imodem_start_particles = \
-                self.data_subscribers.get_samples(WfpEngStcImodemDataParticleType.START_TIME, 1)
-            log.info("WfpEngStcImodemDataParticleType.START_TIME particles: %s",
+                self.data_subscribers.get_samples(WfpEngStcImodemDataParticleType.START_TIME_RECOVERED, 1)
+            log.info("WfpEngStcImodemDataParticleType.START_TIME_RECOVERED particles: %s",
                      imodem_start_particles)
 
             # Retrieve one wfp eng imodem engineering particle
             imodem_engineering_particles = \
-                self.data_subscribers.get_samples(WfpEngStcImodemDataParticleType.ENGINEERING, 1)
-            log.info("WfpEngStcImodemDataParticleType.ENGINEERING particles: %s",
+                self.data_subscribers.get_samples(WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 1)
+            log.info("WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED particles: %s",
                      imodem_engineering_particles)
 
             # Concatenate the two wfp eng imodem particle lists
@@ -362,26 +364,43 @@ class QualificationTest(DataSetQualificationTestCase):
 
         try:
 
+            log.info("About to retrieve 1000 WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED samples.")
+
             # Attempt to retrieve 1000 wfp eng imodem engineering particles
-            particles = self.data_subscribers.get_samples(WfpEngStcImodemDataParticleType.ENGINEERING, 1000, 500)
+            particles = self.data_subscribers.get_samples(
+                WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 1000, 500)
+
+            log.info("Checking number of returned WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED samples.")
 
             # Verify we retrieved 1000 wfp eng imodem engineering particles
             self.assertTrue(len(particles) == 1000)
 
+            log.info("About to retrieve 300 WfpEngWfpSioMuleDataParticleType.ENGINEERING samples.")
+
             # Attempt to retrieve 300 wfp eng sio mule engineering particles
             particles = self.data_subscribers.get_samples(WfpEngWfpSioMuleDataParticleType.ENGINEERING, 300, 500)
+
+            log.info("Checking number of returned WfpEngWfpSioMuleDataParticleType.ENGINEERING samples.")
 
             # Verify we retrieved 300 wfp eng sio mule engineering particles
             self.assertTrue(len(particles) == 300)
 
+            log.info("About to retrieve 100 WfpEngWfpSioMuleDataParticleType.STATUS samples.")
+
             # Attempt to retrieve 100 wfp eng sio mule status particles
             particles = self.data_subscribers.get_samples(WfpEngWfpSioMuleDataParticleType.STATUS, 100, 500)
+
+            log.info("Checking number of returned WfpEngWfpSioMuleDataParticleType.STATUS samples.")
 
             # Verify we retrieved 100 wfp eng sio mule status particles
             self.assertTrue(len(particles) == 100)
 
+            log.info("About to retrieve 100 WfpEngWfpSioMuleDataParticleType.START_TIME samples.")
+
             # Attempt to retrieve 100 wfp eng sio mule start time particles
             particles = self.data_subscribers.get_samples(WfpEngWfpSioMuleDataParticleType.START_TIME, 100, 500)
+
+            log.info("Checking number of returned WfpEngWfpSioMuleDataParticleType.STATUS samples.")
 
             # Verify we retrieved 100 wfp eng sio mule start time particles
             self.assertTrue(len(particles) == 100)
@@ -413,27 +432,27 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Attempt to retrieve one wfp eng sio mule start time particle
             sio_mule_start_time_particles = self.data_subscribers.get_samples(
-                WfpEngWfpSioMuleDataParticleType.START_TIME, 1)
+                WfpEngWfpSioMuleDataParticleType.START_TIME, 1, 100)
             log.info("WfpEngWfpSioMuleDataParticleType.START_TIME particles: %s", sio_mule_start_time_particles)
 
             # Attempt to retrieve one wfp eng sio mule status particle
             sio_mule_status_particles = self.data_subscribers.get_samples(
-                WfpEngWfpSioMuleDataParticleType.STATUS, 1)
+                WfpEngWfpSioMuleDataParticleType.STATUS, 1, 100)
             log.debug("WfpEngWfpSioMuleDataParticleType.STATUS particles: %s", sio_mule_status_particles)
 
             # Attempt to retrieve one wfp eng sio mule engineering particle
             sio_mule_eng_particles = self.data_subscribers.get_samples(
-                WfpEngWfpSioMuleDataParticleType.ENGINEERING, 3)
+                WfpEngWfpSioMuleDataParticleType.ENGINEERING, 3, 100)
             log.debug("WfpEngWfpSioMuleDataParticleType.ENGINEERING particles: %s", sio_mule_eng_particles)
 
             # Attempt to retrieve one wfp eng imodem start time particle
             imodem_start_time_particles = self.data_subscribers.get_samples(
-                WfpEngStcImodemDataParticleType.START_TIME, 1)
+                WfpEngStcImodemDataParticleType.START_TIME_RECOVERED, 1, 100)
             log.debug("WfpEngStcImodemDataParticleType.START_TIME particles: %s", imodem_start_time_particles)
 
             # Attempt to retrieve one wfp eng imodem engineering particle
             imodem_eng_particles = self.data_subscribers.get_samples(
-                WfpEngStcImodemDataParticleType.ENGINEERING, 1)
+                WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 1, 100)
             log.debug("WfpEngStcImodemDataParticleType.ENGINEERING particles: %s", imodem_eng_particles)
 
             # Concatenate the two wfp eng imodem particle lists
@@ -451,8 +470,8 @@ class QualificationTest(DataSetQualificationTestCase):
             self.assert_sample_queue_size(WfpEngWfpSioMuleDataParticleType.START_TIME, 0)
             self.assert_sample_queue_size(WfpEngWfpSioMuleDataParticleType.STATUS, 0)
             self.assert_sample_queue_size(WfpEngWfpSioMuleDataParticleType.ENGINEERING, 0)
-            self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.START_TIME, 0)
-            self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.ENGINEERING, 0)
+            self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.START_TIME_RECOVERED, 0)
+            self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 0)
 
             # Deploy updated wfp eng imodem and wfp eng sio mule data
             self.create_sample_data_set_dir('node58p1-part3.dat', DIR_TEL, FILE_TEL)
@@ -460,7 +479,7 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Attempt to retrieve one wfp eng sio mule start time particle
             sio_mule_start_time_particles2 = self.data_subscribers.get_samples(
-                WfpEngWfpSioMuleDataParticleType.START_TIME, 1)
+                WfpEngWfpSioMuleDataParticleType.START_TIME, 1, 100)
             log.debug("WfpEngWfpSioMuleDataParticleType.START_TIME particles 2nd query: %s",
                       sio_mule_start_time_particles2)
 
@@ -469,11 +488,11 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Attempt to retrieve one imodem start time particle
             imodem_start_time_particles2 = self.data_subscribers.get_samples(
-                WfpEngStcImodemDataParticleType.START_TIME, 1)
+                WfpEngStcImodemDataParticleType.START_TIME_RECOVERED, 1, 100)
 
             # Attempt to retrieve two imodem engineering particles
             imodem_eng_particles2 = self.data_subscribers.get_samples(
-                WfpEngStcImodemDataParticleType.ENGINEERING, 2)
+                WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 2, 100)
 
             log.debug("Stopping sampling")
 
@@ -490,7 +509,7 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Attempt to retrieve one wfp eng sio mule start time particle
             sio_mule_start_time_particles3 = self.data_subscribers.get_samples(
-                WfpEngWfpSioMuleDataParticleType.START_TIME, 1, timeout=100)
+                WfpEngWfpSioMuleDataParticleType.START_TIME, 1, 200)
             log.debug("WfpEngWfpSioMuleDataParticleType.START_TIME particles 3rd query: %s",
                       sio_mule_start_time_particles3)
 
@@ -499,7 +518,7 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Attempt to retrieve two wfp eng sio mule engineering particles
             imodem_eng_particles3 = self.data_subscribers.get_samples(
-                WfpEngStcImodemDataParticleType.ENGINEERING, 2)
+                WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 2, 100)
             log.debug("WfpEngStcImodemDataParticleType.ENGINEERING particles 3rd query: %s",
                       imodem_eng_particles3)
 
@@ -512,7 +531,7 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Verify that the sample queue sizes are 0
             self.assert_sample_queue_size(WfpEngWfpSioMuleDataParticleType.START_TIME, 0)
-            self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.ENGINEERING, 0)
+            self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 0)
 
         except Exception as e:
             log.error("Exception trapped: %s", e)
@@ -541,28 +560,28 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Attempt to retrieve one wfp eng sio mule start time particle
             sio_mule_start_time_particles = self.data_subscribers.get_samples(
-                WfpEngWfpSioMuleDataParticleType.START_TIME, 1)
+                WfpEngWfpSioMuleDataParticleType.START_TIME, 1, 100)
             log.debug("WfpEngWfpSioMuleDataParticleType.START_TIME particles: %s", sio_mule_start_time_particles)
 
             # Attempt to retrieve one wfp eng sio mule status particle
             sio_mule_status_particles = self.data_subscribers.get_samples(
-                WfpEngWfpSioMuleDataParticleType.STATUS, 1)
+                WfpEngWfpSioMuleDataParticleType.STATUS, 1, 100)
             log.debug("WfpEngWfpSioMuleDataParticleType.STATUS particles: %s", sio_mule_status_particles)
 
             # Attempt to retrieve three wfp eng sio mule engineering particles
             sio_mule_eng_particles = self.data_subscribers.get_samples(
-                WfpEngWfpSioMuleDataParticleType.ENGINEERING, 3)
+                WfpEngWfpSioMuleDataParticleType.ENGINEERING, 3, 100)
             log.debug("WfpEngWfpSioMuleDataParticleType.ENGINEERING particles: %s", sio_mule_eng_particles)
 
             # Attempt to retrieve one wfp eng imodem start time particle
             imodem_start_time_particles = self.data_subscribers.get_samples(
-                WfpEngStcImodemDataParticleType.START_TIME, 1)
-            log.debug("WfpEngStcImodemDataParticleType.START_TIME particles: %s", imodem_start_time_particles)
+                WfpEngStcImodemDataParticleType.START_TIME_RECOVERED, 1, 100)
+            log.debug("WfpEngStcImodemDataParticleType.START_TIME_RECOVERED particles: %s", imodem_start_time_particles)
 
             # Attempt to retrieve one wfp eng sio mule start time particle
             imodem_eng_particles = self.data_subscribers.get_samples(
-                WfpEngStcImodemDataParticleType.ENGINEERING, 1)
-            log.debug("WfpEngStcImodemDataParticleType.ENGINEERING particles: %s", imodem_eng_particles)
+                WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 1, 100)
+            log.debug("WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED particles: %s", imodem_eng_particles)
 
             # Concatenate the wfp eng imodem start time and engineering particles into a single list
             imodem_particles = imodem_start_time_particles + imodem_eng_particles
@@ -579,8 +598,8 @@ class QualificationTest(DataSetQualificationTestCase):
             self.assert_sample_queue_size(WfpEngWfpSioMuleDataParticleType.START_TIME, 0)
             self.assert_sample_queue_size(WfpEngWfpSioMuleDataParticleType.STATUS, 0)
             self.assert_sample_queue_size(WfpEngWfpSioMuleDataParticleType.ENGINEERING, 0)
-            self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.START_TIME, 0)
-            self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.ENGINEERING, 0)
+            self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.START_TIME_RECOVERED, 0)
+            self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 0)
 
             # Deploy updated wfp eng imodem and wfp eng sio mule data
             self.create_sample_data_set_dir('node58p1-part3.dat', DIR_TEL, FILE_TEL)
@@ -588,7 +607,7 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Attempt to retrieve one wfp eng sio mule start time particle
             sio_mule_start_time_particles2 = self.data_subscribers.get_samples(
-                WfpEngWfpSioMuleDataParticleType.START_TIME, 1)
+                WfpEngWfpSioMuleDataParticleType.START_TIME, 1, 100)
             log.debug("WfpEngWfpSioMuleDataParticleType.START_TIME particles 2nd query: %s",
                       sio_mule_start_time_particles2)
 
@@ -597,11 +616,11 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Attempt to retrieve one wfp eng imodem start time particle
             imodem_start_time_particles2 = self.data_subscribers.get_samples(
-                WfpEngStcImodemDataParticleType.START_TIME, 1)
+                WfpEngStcImodemDataParticleType.START_TIME_RECOVERED, 1, 100)
 
             # Attempt to retrieve two wfp eng imodem engineering particles
             imodem_eng_particles2 = self.data_subscribers.get_samples(
-                WfpEngStcImodemDataParticleType.ENGINEERING, 2)
+                WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 2, 100)
 
             # Stop the sampling
             self.assert_stop_sampling()
@@ -620,7 +639,7 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Attempt to retrieve one wfp eng sio mule start time particle
             sio_mule_start_time_particles3 = self.data_subscribers.get_samples(
-                WfpEngWfpSioMuleDataParticleType.START_TIME, 1, timeout=100)
+                WfpEngWfpSioMuleDataParticleType.START_TIME, 1, 300)
             log.debug("WfpEngWfpSioMuleDataParticleType.START_TIME particles 3rd query: %s",
                       sio_mule_start_time_particles3)
 
@@ -629,7 +648,7 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Attempt to retrieve two wfp eng imodem engineering particles
             imodem_eng_particles3 = self.data_subscribers.get_samples(
-                WfpEngStcImodemDataParticleType.ENGINEERING, 2)
+                WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 2, 200)
             imodem_particles2 = imodem_start_time_particles2 + imodem_eng_particles2 + imodem_eng_particles3
 
             # Verify that we retrieved the expected wfp eng imodem particles
@@ -637,7 +656,8 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Verify that the sample queue sizes are 0
             self.assert_sample_queue_size(WfpEngWfpSioMuleDataParticleType.START_TIME, 0)
-            self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.ENGINEERING, 0)
+
+            self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 0)
 
         except Exception as e:
             log.error("Exception trapped: %s", e)
@@ -661,13 +681,13 @@ class QualificationTest(DataSetQualificationTestCase):
 
         # Attempt to retrieve one wfp eng imodem start time particle
         imodem_start_time_particles = self.data_subscribers.get_samples(
-            WfpEngStcImodemDataParticleType.START_TIME, 1)
-        log.debug("WfpEngStcImodemDataParticleType.START_TIME particles: %s", imodem_start_time_particles)
+            WfpEngStcImodemDataParticleType.START_TIME_RECOVERED, 1)
+        log.debug("WfpEngStcImodemDataParticleType.START_TIME_RECOVERED particles: %s", imodem_start_time_particles)
 
         # Attempt to retrieve one wfp eng imodem engineering particle
         imodem_eng_particles = self.data_subscribers.get_samples(
-            WfpEngStcImodemDataParticleType.ENGINEERING, 1)
-        log.debug("WfpEngStcImodemDataParticleType.ENGINEERING particles: %s", imodem_eng_particles)
+            WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 1)
+        log.debug("WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED particles: %s", imodem_eng_particles)
 
         # Concatenate the wfp eng imodem start time and engineering particles into a single list
         imodem_particles = imodem_start_time_particles + imodem_eng_particles
@@ -676,8 +696,8 @@ class QualificationTest(DataSetQualificationTestCase):
         self.assert_data_values(imodem_particles, 'recovered.one.yml')
 
         # Verify that the sample queues are empty
-        self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.START_TIME, 0)
-        self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.ENGINEERING, 0)
+        self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.START_TIME_RECOVERED, 0)
+        self.assert_sample_queue_size(WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 0)
 
         # Verify an event was raised and we are in our retry state
         self.assert_event_received(ResourceAgentErrorEvent, 10)
