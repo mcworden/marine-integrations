@@ -69,11 +69,13 @@ class WfpEngWfp(SioMuleDataSetDriver):
         """
         Build and return the parser
         """
+
+        config = self._parser_config.get(data_key)
+
         #
         # If the key is WFP_ENG_STC_IMODEM, build the WFP parser.
         #
         if data_key == DataTypeKey.WFP_ENG_STC_IMODEM:
-            config = self._parser_config
             config.update({
                 'particle_module': 'mi.dataset.parser.wfp_eng__stc_imodem_particles',
                 'particle_class': ['WfpEngStcImodemStatusRecoveredDataParticle',
@@ -95,7 +97,6 @@ class WfpEngWfp(SioMuleDataSetDriver):
         # If the key is WFP_ENG_WFP_SIO_MULE, build the WFP SIO Mule parser.
         #
         elif data_key == DataTypeKey.WFP_ENG_WFP_SIO_MULE:
-            config = self._parser_config
             config.update({
                 'particle_module': 'mi.dataset.parser.wfp_eng_wfp_sio_mule',
                 'particle_class': ['WfpEngWfpSioMuleParserDataStartTimeParticle',
