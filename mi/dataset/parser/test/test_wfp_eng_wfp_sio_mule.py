@@ -53,9 +53,7 @@ class WfpEngWfpSioMuleParserUnitTestCase(ParserUnitTestCase):
         ParserUnitTestCase.setUp(self)
         self.config = {
             DataSetDriverConfigKeys.PARTICLE_MODULE: 'mi.dataset.parser.wfp_eng_wfp_sio_mule',
-            DataSetDriverConfigKeys.PARTICLE_CLASS: ['WfpEngWfpSioMuleParserDataStartTimeParticle',
-                                                     'WfpEngWfpSioMuleParserDataStatusParticle',
-                                                     'WfpEngWfpSioMuleParserDataEngineeringParticle']
+            DataSetDriverConfigKeys.PARTICLE_CLASS: None
         }
         # Define test data particles and their associated timestamps which will be
         # compared with returned results
