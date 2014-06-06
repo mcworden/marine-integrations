@@ -64,17 +64,21 @@ class WFP_ENG__STC_IMODEM_DataSetDriver(MultipleHarvesterDataSetDriver):
         # Default the parser to None
         parser = None
 
+        config = self._parser_config.get(data_key)
+
         #
         # If the key is WFP_ENG_STC_IMODEM_RECOVERED, build the Wfp_eng__stc_imodemParser parser and
         # provide a config that includes the specific recovered particle types.
         #
         if data_key == DataTypeKey.WFP_ENG_STC_IMODEM_RECOVERED:
-            config = self._parser_config
             config.update({
                 'particle_module': 'mi.dataset.parser.wfp_eng__stc_imodem_particles',
-                'particle_class': ['WfpEngStcImodemStatusRecoveredDataParticle',
-                                   'WfpEngStcImodemStartRecoveredDataParticle',
-                                   'WfpEngStcImodemEngineeringRecoveredDataParticle']
+                'particle_class': None,
+                'particle_classes_dict': {
+                    'status_data_particle_class': WfpEngStcImodemStatusRecoveredDataParticle,
+                    'start_data_particle_class': WfpEngStcImodemStartRecoveredDataParticle,
+                    'engineering_data_particle_class': WfpEngStcImodemEngineeringRecoveredDataParticle
+                }
             })
             log.debug("My Config: %s", config)
             parser = WfpEngStcImodemParser(
@@ -83,23 +87,21 @@ class WFP_ENG__STC_IMODEM_DataSetDriver(MultipleHarvesterDataSetDriver):
                 infile,
                 lambda state, ingested: self._save_parser_state(state, data_key, ingested),
                 self._data_callback,
-                self._sample_exception_callback,
-                start_data_particle_class=WfpEngStcImodemStartRecoveredDataParticle,
-                status_data_particle_class=WfpEngStcImodemStatusRecoveredDataParticle,
-                engineering_data_particle_class=WfpEngStcImodemEngineeringRecoveredDataParticle
-            )
+                self._sample_exception_callback)
 
         #
         # If the key is WFP_ENG_STC_IMODEM_TELEMETERED, build the Wfp_eng__stc_imodemParser parser and
         # provide a config that includes the specific telemetered particle types.
         #
         elif data_key == DataTypeKey.WFP_ENG_STC_IMODEM_TELEMETERED:
-            config = self._parser_config
             config.update({
                 'particle_module': 'mi.dataset.parser.wfp_eng__stc_imodem_particles',
-                'particle_class': ['WfpEngStcImodemStatusTelemeteredDataParticle',
-                                   'WfpEngStcImodemStartTelemeteredDataParticle',
-                                   'WfpEngStcImodemEngineeringTelemeteredDataParticle']
+                'particle_class': None,
+                'particle_classes_dict': {
+                    'status_data_particle_class': WfpEngStcImodemStatusTelemeteredDataParticle,
+                    'start_data_particle_class': WfpEngStcImodemStartTelemeteredDataParticle,
+                    'engineering_data_particle_class': WfpEngStcImodemEngineeringTelemeteredDataParticle
+                }
             })
             log.debug("My Config: %s", config)
             parser = WfpEngStcImodemParser(
@@ -108,11 +110,7 @@ class WFP_ENG__STC_IMODEM_DataSetDriver(MultipleHarvesterDataSetDriver):
                 infile,
                 lambda state, ingested: self._save_parser_state(state, data_key, ingested),
                 self._data_callback,
-                self._sample_exception_callback,
-                start_data_particle_class=WfpEngStcImodemStartTelemeteredDataParticle,
-                status_data_particle_class=WfpEngStcImodemStatusTelemeteredDataParticle,
-                engineering_data_particle_class=WfpEngStcImodemEngineeringTelemeteredDataParticle
-            )
+                self._sample_exception_callback)
 
         return parser
 
