@@ -368,7 +368,7 @@ class QualificationTest(DataSetQualificationTestCase):
 
             # Attempt to retrieve 1000 wfp eng imodem engineering particles
             particles = self.data_subscribers.get_samples(
-                WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 1000, 500)
+                WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED, 1000, 5000)
 
             log.info("Checking number of returned WfpEngStcImodemDataParticleType.ENGINEERING_RECOVERED samples.")
 
@@ -378,7 +378,7 @@ class QualificationTest(DataSetQualificationTestCase):
             log.info("About to retrieve 300 WfpEngWfpSioMuleDataParticleType.ENGINEERING samples.")
 
             # Attempt to retrieve 300 wfp eng sio mule engineering particles
-            particles = self.data_subscribers.get_samples(WfpEngWfpSioMuleDataParticleType.ENGINEERING, 300, 500)
+            particles = self.data_subscribers.get_samples(WfpEngWfpSioMuleDataParticleType.ENGINEERING, 300, 5000)
 
             log.info("Checking number of returned WfpEngWfpSioMuleDataParticleType.ENGINEERING samples.")
 
@@ -388,7 +388,7 @@ class QualificationTest(DataSetQualificationTestCase):
             log.info("About to retrieve 100 WfpEngWfpSioMuleDataParticleType.STATUS samples.")
 
             # Attempt to retrieve 100 wfp eng sio mule status particles
-            particles = self.data_subscribers.get_samples(WfpEngWfpSioMuleDataParticleType.STATUS, 100, 500)
+            particles = self.data_subscribers.get_samples(WfpEngWfpSioMuleDataParticleType.STATUS, 100, 5000)
 
             log.info("Checking number of returned WfpEngWfpSioMuleDataParticleType.STATUS samples.")
 
@@ -398,7 +398,7 @@ class QualificationTest(DataSetQualificationTestCase):
             log.info("About to retrieve 100 WfpEngWfpSioMuleDataParticleType.START_TIME samples.")
 
             # Attempt to retrieve 100 wfp eng sio mule start time particles
-            particles = self.data_subscribers.get_samples(WfpEngWfpSioMuleDataParticleType.START_TIME, 100, 500)
+            particles = self.data_subscribers.get_samples(WfpEngWfpSioMuleDataParticleType.START_TIME, 100, 5000)
 
             log.info("Checking number of returned WfpEngWfpSioMuleDataParticleType.STATUS samples.")
 
