@@ -16,7 +16,7 @@ from mi.core.log import get_logger
 log = get_logger()
 
 from mi.dataset.dataset_driver import \
-    HarvesterType
+    HarvesterType, DataSetDriverConfigKeys
 
 from mi.dataset.driver.sio_mule.sio_mule_driver import SioMuleDataSetDriver
 
@@ -77,8 +77,8 @@ class WfpEngWfp(SioMuleDataSetDriver):
         #
         if data_key == DataTypeKey.WFP_ENG_STC_IMODEM:
             config.update({
-                'particle_module': 'mi.dataset.parser.wfp_eng__stc_imodem_particles',
-                'particle_class': None,
+                DataSetDriverConfigKeys.PARTICLE_MODULE: 'mi.dataset.parser.wfp_eng__stc_imodem_particles',
+                DataSetDriverConfigKeys.PARTICLE_CLASS: None,
                 'particle_classes_dict': {
                     'status_data_particle_class': WfpEngStcImodemStatusRecoveredDataParticle,
                     'start_data_particle_class': WfpEngStcImodemStartRecoveredDataParticle,
@@ -98,10 +98,13 @@ class WfpEngWfp(SioMuleDataSetDriver):
         #
         elif data_key == DataTypeKey.WFP_ENG_WFP_SIO_MULE:
             config.update({
-                'particle_module': 'mi.dataset.parser.wfp_eng_wfp_sio_mule',
-                'particle_class': ['WfpEngWfpSioMuleParserDataStartTimeParticle',
-                                   'WfpEngWfpSioMuleParserDataStatusParticle',
-                                   'WfpEngWfpSioMuleParserDataEngineeringParticle']
+                DataSetDriverConfigKeys.PARTICLE_MODULE: 'mi.dataset.parser.wfp_eng_wfp_sio_mule',
+                DataSetDriverConfigKeys.PARTICLE_CLASS: None,
+                'particle_classes_dict': {
+                    'start_time_data_particle_class': WfpEngWfpSioMuleParserDataStartTimeParticle,
+                    'status_data_particle_class': WfpEngWfpSioMuleParserDataStatusParticle,
+                    'engineering_data_particle_class': WfpEngWfpSioMuleParserDataEngineeringParticle
+                }
             })
 
             parser = WfpEngWfpSioMuleParser(config, parser_state, infile,
