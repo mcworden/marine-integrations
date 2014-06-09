@@ -15,7 +15,6 @@ __license__ = 'Apache 2.0'
 
 import copy
 import gevent
-import re
 import ntplib
 import struct
 
@@ -25,20 +24,8 @@ from mi.core.common import BaseEnum
 from mi.core.instrument.data_particle import DataParticle
 from mi.core.exceptions import SampleException, UnexpectedDataException
 from mi.dataset.parser.WFP_E_file_common import WfpEFileParser, HEADER_BYTES, STATUS_BYTES_AUGMENTED, \
-    STATUS_BYTES, STATUS_START_MATCHER
-
-# This regex will be used to match the flags for the global wfp e engineering record:
-# 0001 0000 0000 0001 0000 0000 0000 0001 (regex: \x00\x01\x00{5}\x01\x00{7}\x01)
-# followed by 8 bytes of variable timestamp data (regex: [\x00-\xff]{8})
-WFP_E_GLOBAL_FLAGS_HEADER_REGEX = b'(\x00\x01\x00{5}\x01\x00{7}\x01)([\x00-\xff]{8})'
-WFP_E_GLOBAL_FLAGS_HEADER_MATCHER = re.compile(WFP_E_GLOBAL_FLAGS_HEADER_REGEX)
-
-# Includes indicator/timestamp and the data consists of variable 26 bytes
-WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_REGEX = b'([\x00-\xff]{4})([\x00-\xff]{26})'
-WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_MATCHER = re.compile(WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_REGEX)
-
-# 4 bytes for the Engineering Data Record time stamp, 26 bytes for the global Engineering Data Record
-WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_BYTES = 30
+    STATUS_BYTES, STATUS_START_MATCHER, WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_MATCHER, \
+    WFP_E_GLOBAL_FLAGS_HEADER_MATCHER, WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_BYTES
 
 
 class DataParticleType(BaseEnum):
