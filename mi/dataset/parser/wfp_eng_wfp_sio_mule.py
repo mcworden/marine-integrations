@@ -24,7 +24,7 @@ from mi.core.common import BaseEnum
 from mi.core.instrument.data_particle import DataParticle, DataParticleKey
 from mi.core.exceptions import SampleException
 from mi.dataset.parser.sio_mule_common import SioMuleParser, SIO_HEADER_MATCHER
-from mi.dataset.parser.dosta_ln_wfp import WFP_E_GLOBAL_FLAGS_HEADER_REGEX, \
+from mi.dataset.parser.WFP_E_file_common import WFP_E_GLOBAL_FLAGS_HEADER_REGEX, \
     WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_MATCHER, WFP_E_GLOBAL_RECOVERED_ENG_DATA_SAMPLE_BYTES
 from mi.dataset.parser.WFP_E_file_common import STATUS_BYTES_AUGMENTED, \
     STATUS_BYTES, STATUS_START_MATCHER
