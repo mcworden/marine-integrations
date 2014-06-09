@@ -15,7 +15,8 @@ from mi.core.common import BaseEnum
 from mi.core.log import get_logger
 log = get_logger()
 
-from mi.dataset.dataset_driver import HarvesterType
+from mi.core.exceptions import ConfigurationException
+from mi.dataset.dataset_driver import HarvesterType, DataSetDriverConfigKeys
 from mi.dataset.dataset_driver import MultipleHarvesterDataSetDriver
 from mi.dataset.parser.wfp_eng__stc_imodem import WfpEngStcImodemParser
 from mi.dataset.parser.wfp_eng__stc_imodem_particles import WfpEngStcImodemStatusRecoveredDataParticle
@@ -72,8 +73,8 @@ class WFP_ENG__STC_IMODEM_DataSetDriver(MultipleHarvesterDataSetDriver):
         #
         if data_key == DataTypeKey.WFP_ENG_STC_IMODEM_RECOVERED:
             config.update({
-                'particle_module': 'mi.dataset.parser.wfp_eng__stc_imodem_particles',
-                'particle_class': None,
+                DataSetDriverConfigKeys.PARTICLE_MODULE: 'mi.dataset.parser.wfp_eng__stc_imodem_particles',
+                DataSetDriverConfigKeys.PARTICLE_CLASS: None,
                 'particle_classes_dict': {
                     'status_data_particle_class': WfpEngStcImodemStatusRecoveredDataParticle,
                     'start_data_particle_class': WfpEngStcImodemStartRecoveredDataParticle,
@@ -95,8 +96,8 @@ class WFP_ENG__STC_IMODEM_DataSetDriver(MultipleHarvesterDataSetDriver):
         #
         elif data_key == DataTypeKey.WFP_ENG_STC_IMODEM_TELEMETERED:
             config.update({
-                'particle_module': 'mi.dataset.parser.wfp_eng__stc_imodem_particles',
-                'particle_class': None,
+                DataSetDriverConfigKeys.PARTICLE_MODULE: 'mi.dataset.parser.wfp_eng__stc_imodem_particles',
+                DataSetDriverConfigKeys.PARTICLE_CLASS: None,
                 'particle_classes_dict': {
                     'status_data_particle_class': WfpEngStcImodemStatusTelemeteredDataParticle,
                     'start_data_particle_class': WfpEngStcImodemStartTelemeteredDataParticle,
@@ -111,6 +112,9 @@ class WFP_ENG__STC_IMODEM_DataSetDriver(MultipleHarvesterDataSetDriver):
                 lambda state, ingested: self._save_parser_state(state, data_key, ingested),
                 self._data_callback,
                 self._sample_exception_callback)
+
+        else:
+            raise ConfigurationException
 
         return parser
 
