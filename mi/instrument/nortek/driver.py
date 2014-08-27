@@ -68,15 +68,15 @@ HEAD_CONFIG_SYNC_BYTES = '\xa5\x04\x70\x00'
 
 CHECK_SUM_SEED = 0xb58c
 
-HARDWARE_CONFIG_DATA_PATTERN = r'%s(.{14})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{12})(.{4})(.{2})' \
+HARDWARE_CONFIG_DATA_PATTERN = r'(%s)(.{14})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{12})(.{4})(.{2})(\x06\x06)' \
                                % HW_CONFIG_SYNC_BYTES
 HARDWARE_CONFIG_DATA_REGEX = re.compile(HARDWARE_CONFIG_DATA_PATTERN, re.DOTALL)
-HEAD_CONFIG_DATA_PATTERN = r'%s(.{2})(.{2})(.{2})(.{12})(.{176})(.{22})(.{2})(.{2})' % HEAD_CONFIG_SYNC_BYTES
+HEAD_CONFIG_DATA_PATTERN = r'(%s)(.{2})(.{2})(.{2})(.{12})(.{176})(.{22})(.{2})(.{2})(\x06\x06)' % HEAD_CONFIG_SYNC_BYTES
 HEAD_CONFIG_DATA_REGEX = re.compile(HEAD_CONFIG_DATA_PATTERN, re.DOTALL)
-USER_CONFIG_DATA_PATTERN = r'%s(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})' \
+USER_CONFIG_DATA_PATTERN = r'(%s)(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})' \
                            r'(.{2})(.{2})(.{2})(.{2})(.{2})(.{6})(.{2})(.{6})(.{4})(.{2})(.{2})(.{2})(.{2})(.{2})' \
                            r'(.{2})(.{2})(.{2})(.{2})(.{180})(.{180})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})' \
-                           r'(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{30})(.{16})(.{2})' % USER_CONFIG_SYNC_BYTES
+                           r'(.{2})(.{2})(.{2})(.{2})(.{2})(.{2})(.{30})(.{16})(.{2})(\x06\x06)' % USER_CONFIG_SYNC_BYTES
 USER_CONFIG_DATA_REGEX = re.compile(USER_CONFIG_DATA_PATTERN, re.DOTALL)
 
 # min, sec, day, hour, year, month
@@ -92,7 +92,7 @@ BATTERY_DATA_PATTERN = r'([\x00-\xFF][\x13-\x46])\x06\x06'
 BATTERY_DATA_REGEX = re.compile(BATTERY_DATA_PATTERN, re.DOTALL)
 
 # [\x00, \x01, \x02, \x04, and \x05]
-MODE_DATA_PATTERN = r'([\x00-\x02,\x04,\x05]\x00)\x06\x06'
+MODE_DATA_PATTERN = r'([\x00-\x02,\x04,\x05]\x00)(\x06\x06)'
 MODE_DATA_REGEX = re.compile(MODE_DATA_PATTERN, re.DOTALL)
 
 # ["VEC 8181", "AQD 8493      "]
@@ -277,7 +277,7 @@ class NortekHardwareConfigDataParticleKey(BaseEnum):
     """
     Particle key for the hw config
     """
-    SERIAL_NUM = 'instmt_type_serial_number'
+    SERIAL_NUM = 'instrmt_type_serial_number'
     RECORDER_INSTALLED = 'recorder_installed'
     COMPASS_INSTALLED = 'compass_installed'
     BOARD_FREQUENCY = 'board_frequency'
@@ -324,7 +324,7 @@ class NortekHardwareConfigDataParticle(DataParticle):
                   {DataParticleKey.VALUE_ID: NortekHardwareConfigDataParticleKey.VELOCITY_RANGE, DataParticleKey.VALUE: working_value[NortekHardwareConfigDataParticleKey.VELOCITY_RANGE]},
                   {DataParticleKey.VALUE_ID: NortekHardwareConfigDataParticleKey.FW_VERSION, DataParticleKey.VALUE: working_value[NortekHardwareConfigDataParticleKey.FW_VERSION]}]
 
-        calculated_checksum = NortekProtocolParameterDict.calculate_checksum(self.raw_data)
+        calculated_checksum = NortekProtocolParameterDict.calculate_checksum(self.raw_data, HW_CONFIG_LEN)
         if working_value[NortekHardwareConfigDataParticleKey.CHECKSUM] != calculated_checksum:
             log.warn("Calculated checksum: %s did not match packet checksum: %s",
                      calculated_checksum, working_value[NortekHardwareConfigDataParticleKey.CHECKSUM])
@@ -414,7 +414,7 @@ class NortekHeadConfigDataParticle(DataParticle):
                    DataParticleKey.BINARY: True},
                   {DataParticleKey.VALUE_ID: NortekHeadConfigDataParticleKey.NUM_BEAMS, DataParticleKey.VALUE: working_value[NortekHeadConfigDataParticleKey.NUM_BEAMS]}]
 
-        calculated_checksum = NortekProtocolParameterDict.calculate_checksum(self.raw_data)
+        calculated_checksum = NortekProtocolParameterDict.calculate_checksum(self.raw_data, HEAD_CONFIG_LEN)
         if working_value[NortekHeadConfigDataParticleKey.CHECKSUM] != calculated_checksum:
             log.warn("Calculated checksum: %s did not match packet checksum: %s",
                      calculated_checksum, working_value[NortekHeadConfigDataParticleKey.CHECKSUM])
@@ -516,7 +516,7 @@ class NortekUserConfigDataParticleKey(BaseEnum):
     CELL_SIZE = 'cell_size'
     MEASUREMENT_INTERVAL = 'measurement_interval'
     DEPLOYMENT_NAME = 'deployment_name'
-    WRAP_MODE = 'wrap_mode'
+    WRAP_MODE = 'wrap_moder'
     DEPLOY_START_TIME = 'deployment_start_time'
     DIAG_INTERVAL = 'diagnostics_interval'
     MODE = 'mode'
@@ -541,7 +541,7 @@ class NortekUserConfigDataParticleKey(BaseEnum):
     FILE_COMMENTS = 'file_comments'
     WAVE_MODE = 'wave_mode'
     WAVE_DATA_RATE = 'wave_data_rate'
-    WAVE_CELL_POS = 'wave_cell_pos'
+    WAVE_CELL_POS = 'wave_cell_position'
     DYNAMIC_POS_TYPE = 'dynamic_position_type'
     PERCENT_WAVE_CELL_POS = 'percent_wave_cell_position'
     WAVE_TX_PULSE = 'wave_transmit_pulse'
@@ -724,7 +724,7 @@ class NortekUserConfigDataParticle(DataParticle):
                   {DataParticleKey.VALUE_ID: NortekUserConfigDataParticleKey.TX_PULSE_LEN_2ND, DataParticleKey.VALUE: working_value[NortekUserConfigDataParticleKey.TX_PULSE_LEN_2ND]},
                   {DataParticleKey.VALUE_ID: NortekUserConfigDataParticleKey.FILTER_CONSTANTS, DataParticleKey.VALUE: working_value[NortekUserConfigDataParticleKey.FILTER_CONSTANTS]}]
 
-        calculated_checksum = NortekProtocolParameterDict.calculate_checksum(self.raw_data)
+        calculated_checksum = NortekProtocolParameterDict.calculate_checksum(self.raw_data, USER_CONFIG_LEN)
         if working_value[NortekUserConfigDataParticleKey.CHECKSUM] != calculated_checksum:
             log.warn("Calculated checksum: %s did not match packet checksum: %s",
                      calculated_checksum, working_value[NortekUserConfigDataParticleKey.CHECKSUM])
@@ -783,7 +783,7 @@ class NortekEngBatteryDataParticleKey(BaseEnum):
     """
     Particles for the battery data
     """
-    BATTERY_VOLTAGE = "battery_voltage"
+    BATTERY_VOLTAGE = "battery_voltage_mv"
 
 
 class NortekEngBatteryDataParticle(DataParticle):
@@ -1190,7 +1190,6 @@ class NortekInstrumentProtocol(CommandResponseInstrumentProtocol):
         self._protocol_fsm.start(ProtocolState.UNKNOWN)
 
         # Add build handlers for device commands.
-        #self._add_build_handler(InstrumentCmds.CONFIGURE_INSTRUMENT, self._build_set_configuration_command)
         self._add_build_handler(InstrumentCmds.SET_REAL_TIME_CLOCK, self._build_set_real_time_clock_command)
 
         # Add response handlers for device commands.
@@ -1325,12 +1324,14 @@ class NortekInstrumentProtocol(CommandResponseInstrumentProtocol):
 
         output = self._create_set_output(self._param_dict)
 
+        # Clear the prompt buffer.
+        self._promptbuf = ''
+        self._linebuf = ''
+
         log.debug('_set_params: writing instrument configuration to instrument')
         self._connection.send(InstrumentCmds.CONFIGURE_INSTRUMENT)
         self._connection.send(output)
 
-        # Clear the prompt buffer.
-        self._promptbuf = ''
         result = self._get_response(timeout=30,
                                     expected_prompt=[InstrumentPrompts.Z_ACK, InstrumentPrompts.Z_NACK])
 
@@ -1453,7 +1454,7 @@ class NortekInstrumentProtocol(CommandResponseInstrumentProtocol):
             if self._param_dict.get(EngineeringParameter.CLOCK_SYNC_INTERVAL) != '00:00:00':
                 self.start_scheduled_job(EngineeringParameter.CLOCK_SYNC_INTERVAL, ScheduledJob.CLOCK_SYNC, ProtocolEvent.CLOCK_SYNC)
 
-        if self._param_dict.get(EngineeringParameter.CLOCK_SYNC_INTERVAL) is not None:
+        if self._param_dict.get(EngineeringParameter.ACQUIRE_STATUS_INTERVAL) is not None:
             log.debug("Configuring the scheduler to acquire status %s", self._param_dict.get(EngineeringParameter.ACQUIRE_STATUS_INTERVAL))
             if self._param_dict.get(EngineeringParameter.ACQUIRE_STATUS_INTERVAL) != '00:00:00':
                 self.start_scheduled_job(EngineeringParameter.ACQUIRE_STATUS_INTERVAL, ScheduledJob.ACQUIRE_STATUS, ProtocolEvent.ACQUIRE_STATUS)
@@ -1501,19 +1502,21 @@ class NortekInstrumentProtocol(CommandResponseInstrumentProtocol):
         """
 
         #ID + BV    Call these commands at the same time, so their responses are combined (non-unique regex workaround)
-        self._handler_command_read_id_battery_voltage()
+        # Issue read id, battery voltage, & clock commands all at the same time (non-unique REGEX workaround).
+        self._do_cmd_resp(InstrumentCmds.READ_ID + InstrumentCmds.READ_BATTERY_VOLTAGE,
+                          response_regex=ID_BATTERY_DATA_REGEX, timeout=30)
 
         #RC
-        self._handler_command_read_clock()
+        self._do_cmd_resp(InstrumentCmds.READ_REAL_TIME_CLOCK, response_regex=CLOCK_DATA_REGEX)
 
         #GP
-        self._handler_command_get_hw_config()
+        self._do_cmd_resp(InstrumentCmds.READ_HW_CONFIGURATION, response_regex=HARDWARE_CONFIG_DATA_REGEX)
 
         #GH
-        self._handler_command_get_head_config()
+        self._do_cmd_resp(InstrumentCmds.READ_HEAD_CONFIGURATION, response_regex=HEAD_CONFIG_DATA_REGEX)
 
         #GC
-        self._handler_command_get_user_config()
+        self._do_cmd_resp(InstrumentCmds.READ_USER_CONFIGURATION, response_regex=USER_CONFIG_DATA_REGEX)
 
         return None, (None, None)
 
@@ -1567,45 +1570,13 @@ class NortekInstrumentProtocol(CommandResponseInstrumentProtocol):
         try:
             self._connection.send(InstrumentCmds.AUTOSAMPLE_BREAK)
             time.sleep(.1)
-            result = self._do_cmd_resp(InstrumentCmds.SAMPLE_WHAT_MODE, timeout=0.6)
+            result = self._do_cmd_resp(InstrumentCmds.SAMPLE_WHAT_MODE, timeout=0.6, response_regex=MODE_DATA_REGEX)
         except InstrumentTimeoutException:
             log.debug('_handler_unknown_read_mode: no response to "I", sending "II"')
             # if there is no response, catch timeout exception and issue 'II' command instead
-            result = self._do_cmd_resp(InstrumentCmds.CMD_WHAT_MODE)
+            result = self._do_cmd_resp(InstrumentCmds.CMD_WHAT_MODE, response_regex=MODE_DATA_REGEX)
 
         return next_state, (next_agent_state, result)
-
-    def _handler_command_read_id_battery_voltage(self):
-        """
-        Issue read id, battery voltage, & clock commands all at the same time (non-unique REGEX workaround).
-        """
-        result = self._do_cmd_resp(InstrumentCmds.READ_ID + InstrumentCmds.READ_BATTERY_VOLTAGE,
-                                   response_regex=ID_BATTERY_DATA_REGEX, timeout=30)
-        return None, (None, result)
-
-    def _handler_command_read_id(self):
-        result = self._do_cmd_resp(InstrumentCmds.READ_ID,response_regex=ID_DATA_REGEX)
-        return None, (None, result)
-
-    def _handler_command_read_battery_voltage(self):
-        result = self._do_cmd_resp(InstrumentCmds.READ_BATTERY_VOLTAGE, response_regex=BATTERY_DATA_REGEX)
-        return None, (None, result)
-
-    def _handler_command_read_clock(self):
-        result = self._do_cmd_resp(InstrumentCmds.READ_REAL_TIME_CLOCK, response_regex=CLOCK_DATA_REGEX)
-        return None, (None, result)
-
-    def _handler_command_get_hw_config(self):
-        result = self._do_cmd_resp(InstrumentCmds.READ_HW_CONFIGURATION) #, response_regex=HARDWARE_CONFIG_DATA_REGEX)
-        return None, (None, result)
-
-    def _handler_command_get_head_config(self):
-        result = self._do_cmd_resp(InstrumentCmds.READ_HEAD_CONFIGURATION) #, response_regex=HEAD_CONFIG_DATA_REGEX)
-        return None, (None, result)
-
-    def _handler_command_get_user_config(self):
-        result = self._do_cmd_resp(InstrumentCmds.READ_USER_CONFIGURATION) #, response_regex=USER_CONFIG_DATA_REGEX)
-        return None, (None, result)
 
     def _clock_sync(self, *args, **kwargs):
         """
@@ -1977,10 +1948,9 @@ class NortekInstrumentProtocol(CommandResponseInstrumentProtocol):
         """
         # get user_configuration params from the instrument
         log.debug('Sending get_user_configuration command to the instrument.')
-        ret_config = self._do_cmd_resp(InstrumentCmds.READ_USER_CONFIGURATION)
+        ret_config = self._do_cmd_resp(InstrumentCmds.READ_USER_CONFIGURATION, response_regex=USER_CONFIG_DATA_REGEX)
 
-        if self._check_configuration(ret_config, USER_CONFIG_SYNC_BYTES, USER_CONFIG_LEN):
-            self._param_dict.update(ret_config)
+        self._param_dict.update(ret_config)
 
     def _create_set_output(self, parameters):
         """
@@ -2172,9 +2142,10 @@ class NortekInstrumentProtocol(CommandResponseInstrumentProtocol):
         @retval return The user configuration parsed into a dict. Names include:
         @raise InstrumentProtocolException When a bad response is encountered
         """
-        if not self._check_configuration(self._promptbuf, USER_CONFIG_SYNC_BYTES, USER_CONFIG_LEN):
+        log.debug("_parse_read_user_config: response=%s", response.encode('hex'))
+
+        if not self._check_configuration(response, USER_CONFIG_SYNC_BYTES, USER_CONFIG_LEN):
             log.warn("_parse_read_user_config: Bad read user response from instrument (%s)", response.encode('hex'))
             raise InstrumentProtocolException("Invalid read user response. (%s)" % response.encode('hex'))
-        log.debug("_parse_read_user_config: response=%s", response.encode('hex'))
 
         return response
