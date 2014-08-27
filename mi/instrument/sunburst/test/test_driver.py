@@ -45,14 +45,14 @@ from mi.core.instrument.port_agent_client import PortAgentPacket
 from mi.core.instrument.data_particle import DataParticleKey
 from mi.core.instrument.data_particle import DataParticleValue
 
-from mi.instrument.sunburst.driver import Prompt
+from mi.instrument.sunburst.driver import Prompt, SamiRegularStatusDataParticle, SamiBatteryVoltageDataParticle, \
+    SamiThermistorVoltageDataParticle, SamiControlRecordDataParticle
 from mi.instrument.sunburst.driver import SAMI_NEWLINE
 from mi.instrument.sunburst.driver import SamiControlRecordDataParticleKey
 from mi.instrument.sunburst.driver import SamiRegularStatusDataParticleKey
 from mi.instrument.sunburst.driver import SamiBatteryVoltageDataParticleKey
 from mi.instrument.sunburst.driver import SamiThermistorVoltageDataParticleKey
 from mi.instrument.sunburst.driver import SamiProtocolState
-from mi.instrument.sunburst.driver import SamiDataParticleType
 from mi.instrument.sunburst.driver import SamiProtocolEvent
 from mi.instrument.sunburst.driver import SamiProtocol
 from mi.instrument.sunburst.driver import SAMI_UNIX_OFFSET
@@ -260,7 +260,7 @@ class SamiMixin(DriverTestMixin):
         self.assert_data_particle_keys(SamiBatteryVoltageDataParticleKey,
                                        self._battery_voltage_parameters)
         self.assert_data_particle_header(data_particle,
-                                         SamiDataParticleType.BATTERY_VOLTAGE)
+                                         SamiBatteryVoltageDataParticle._data_particle_type)
         self.assert_data_particle_parameters(data_particle,
                                              self._battery_voltage_parameters,
                                              verify_values)
@@ -274,7 +274,7 @@ class SamiMixin(DriverTestMixin):
         self.assert_data_particle_keys(SamiThermistorVoltageDataParticleKey,
                                        self._thermistor_voltage_parameters)
         self.assert_data_particle_header(data_particle,
-                                         SamiDataParticleType.THERMISTOR_VOLTAGE)
+                                         SamiThermistorVoltageDataParticle._data_particle_type)
         self.assert_data_particle_parameters(data_particle,
                                              self._thermistor_voltage_parameters,
                                              verify_values)
@@ -289,7 +289,7 @@ class SamiMixin(DriverTestMixin):
         self.assert_data_particle_keys(SamiRegularStatusDataParticleKey,
                                        self._regular_status_parameters)
         self.assert_data_particle_header(data_particle,
-                                         SamiDataParticleType.REGULAR_STATUS)
+                                         SamiRegularStatusDataParticle._data_particle_type)
         self.assert_data_particle_parameters(data_particle,
                                              self._regular_status_parameters,
                                              verify_values)
@@ -304,7 +304,7 @@ class SamiMixin(DriverTestMixin):
         self.assert_data_particle_keys(SamiControlRecordDataParticleKey,
                                        self._control_record_parameters)
         self.assert_data_particle_header(data_particle,
-                                         SamiDataParticleType.CONTROL_RECORD)
+                                         SamiControlRecordDataParticle._data_particle_type)
         self.assert_data_particle_parameters(data_particle,
                                              self._control_record_parameters,
                                              verify_values)
@@ -354,6 +354,12 @@ class SamiMixin(DriverTestMixin):
 ###############################################################################
 @attr('UNIT', group='mi')
 class SamiUnitTest(InstrumentDriverUnitTestCase, SamiMixin):
+
+    def sleep_for_realsies(self, seconds):
+        now = time.time()
+        while time.time() < (now+seconds):
+            time.sleep(.4)
+
     def assert_waiting_discover(self, driver):
         self.assert_initialize_driver(driver, initial_protocol_state=SamiProtocolState.WAITING)
 
@@ -367,7 +373,7 @@ class SamiUnitTest(InstrumentDriverUnitTestCase, SamiMixin):
                 :return: protocol and agent states
                 """
                 DiscoverWaitingStatisticsContainer.side_effect(self)
-                return (SamiProtocolState.WAITING, ResourceAgentState.BUSY)
+                return SamiProtocolState.WAITING, ResourceAgentState.BUSY
 
         stats = DiscoverWaitingStatisticsContainer(self)
         driver._protocol._discover = Mock(side_effect=stats.discover_waiting_side_effect)
@@ -413,7 +419,7 @@ class SamiUnitTest(InstrumentDriverUnitTestCase, SamiMixin):
         ## Don't take sample upon entering autosample state
         driver._protocol._queued_commands.reset()
 
-        time.sleep(62)
+        self.sleep_for_realsies(62)
 
         (driver._protocol._protocol_fsm.current_state, (agent_state, result)) = \
             driver._protocol._handler_autosample_stop()
@@ -424,7 +430,7 @@ class SamiUnitTest(InstrumentDriverUnitTestCase, SamiMixin):
         stats.call_count = 0
         stats.call_times = []
 
-        time.sleep(62)
+        self.sleep_for_realsies(62)
 
         stats.assert_call_count(0)
 
@@ -513,7 +519,7 @@ class SamiIntegrationTest(InstrumentDriverIntegrationTestCase):
         self.clear_events()
         request_status_time = time.time()
         self.assert_driver_command(SamiProtocolEvent.ACQUIRE_STATUS)
-        self.assert_async_particle_generation(SamiDataParticleType.REGULAR_STATUS, self.assert_time_sync, timeout=10)
+        self.assert_async_particle_generation(SamiRegularStatusDataParticle._data_particle_type, self.assert_time_sync, timeout=10)#SamiDataParticleType.REGULAR_STATUS, self.assert_time_sync, timeout=10)
         receive_status_time = time.time()
         status_time = receive_status_time - request_status_time
         log.debug("status_time = %s", status_time)
@@ -567,7 +573,7 @@ class SamiQualificationTest(InstrumentDriverQualificationTestCase):
 
         # Begin streaming.
         cmd = AgentCommand(command=DriverEvent.START_AUTOSAMPLE)
-        retval = self.instrument_agent_client.execute_resource(cmd, timeout=timeout)
+        self.instrument_agent_client.execute_resource(cmd, timeout=timeout)
 
         self.assert_state_change(ResourceAgentState.STREAMING, SamiProtocolState.AUTOSAMPLE, timeout=timeout)
 
@@ -588,7 +594,7 @@ class SamiQualificationTest(InstrumentDriverQualificationTestCase):
 
         # Begin streaming.
         cmd = AgentCommand(command=DriverEvent.START_AUTOSAMPLE)
-        retval = self.instrument_agent_client.execute_resource(cmd, timeout=timeout)
+        self.instrument_agent_client.execute_resource(cmd, timeout=timeout)
 
         # Wait for driver to exit sample state
         self.assert_particle_async(sample_queue, sample_data_assert, 1, timeout)
